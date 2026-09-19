@@ -96,6 +96,26 @@ std::optional<int> GetCapitalStateNumber(int vic3_country_number,
 }
 
 
+void MarkCapitalsAsCapitals(const std::map<std::string, hoi4::Country>& countries, std::vector<hoi4::State>& states)
+{
+   for (const hoi4::Country& country: countries | std::views::values)
+   {
+      const std::optional<int> possible_capital = country.GetCapitalState();
+      if (!possible_capital)
+      {
+         continue;
+      }
+      if (*possible_capital - 1 > states.size())
+      {
+         continue;
+      }
+
+      hoi4::State& capital_state = states.at(*possible_capital - 1);
+      capital_state.SetIsCapital(true);
+   }
+}
+
+
 void IncreaseAirBasesInCapitals(const std::map<std::string, hoi4::Country>& countries, std::vector<hoi4::State>& states)
 {
    for (const hoi4::Country& country: countries | std::views::values)
@@ -295,6 +315,7 @@ hoi4::World hoi4::ConvertWorld(const commonItems::ModFilesystem& hoi4_mod_filesy
        MapPowers(source_world.GetCountryRankings().GetGreatPowers(), world_mapper.country_mapper);
    std::set<std::string> major_powers =
        MapPowers(source_world.GetCountryRankings().GetMajorPowers(), world_mapper.country_mapper);
+   MarkCapitalsAsCapitals(countries, states.states);
    IncreaseAirBasesInCapitals(countries, states.states);
    IncreaseVictoryPointsInCapitals(states.states,
        source_world.GetCountryRankings(),
@@ -320,7 +341,33 @@ hoi4::World hoi4::ConvertWorld(const commonItems::ModFilesystem& hoi4_mod_filesy
    hoi4::Buildings buildings = buildings_future.get();
    ProgressManager::AddProgress(5);
 
-   hoi4::World world(hoi4::WorldOptions{.countries = countries,
+   std::map<std::string, std::set<int>> homelands;  // culture -> states with culture as homeland
+   for (auto& state: states.states)
+   {
+      for (const std::string& culture: state.GetHomelands())
+      {
+         if (auto [itr, success] = homelands.emplace(culture, std::set{state.GetId()}); !success)
+         {
+            itr->second.insert(state.GetId());
+         }
+      }
+   }
+
+   std::map<std::string, std::set<std::string>>
+       primary_culture_countries;  // culture -> cultures with culture as primary culture
+   for (const Country& country: countries | std::views::values)
+   {
+      for (const std::string& culture: country.GetPrimaryCultures())
+      {
+         if (auto [itr, success] = primary_culture_countries.emplace(culture, std::set{country.GetTag()}); !success)
+         {
+            itr->second.insert(country.GetTag());
+         }
+      }
+   }
+
+   hoi4::World world(hoi4::WorldOptions{
+       .countries = countries,
        .great_powers = great_powers,
        .major_powers = major_powers,
        .states = states,
@@ -328,15 +375,65 @@ hoi4::World hoi4::ConvertWorld(const commonItems::ModFilesystem& hoi4_mod_filesy
        .buildings = buildings,
        .railways = railways,
        .localizations = localizations,
-       .characters = characters});
+       .characters = characters,
+       .culture_definitions = source_world.GetCultureDefinitions(),
+       .homelands = homelands,
+       .primary_culture_countries = primary_culture_countries,
+   });
 
    std::set<DecisionsCategory> decisions_categories;
    std::map<std::string, std::vector<Decision>> decisions_in_categories;
    std::map<std::string, std::vector<Event>> country_events;
+   std::vector<std::string> scripted_effects;
 
    const std::map<std::string, Role> roles = ImportRoles();
    std::map<std::string, Country>& modifiable_countries = world.GetModifiableCountries();
-   for (const auto& [tag, country_roles]: CreateStories(roles, world, modifiable_countries))
+
+   std::map<std::string, std::vector<hoi4::Role>> stories = CreateStories(roles, world, modifiable_countries);
+
+   // Create tag aliases
+   std::map<std::string, std::string> aliases;
+
+   char alias_char = 'A';
+   int alias_number = 0;
+   for (auto& [tag, country_roles]: stories)
+   {
+      for (const Role& country_role: country_roles)
+      {
+         for (const auto& alias_definition: country_role.GetAliasDefinitions())
+         {
+            std::string alias_tag = fmt::format("{}{:0>2}", alias_char, alias_number);
+            alias_number++;
+            if (alias_number > 99)
+            {
+               alias_number = 0;
+               alias_char++;
+            }
+
+            std::string flag = alias_definition.country_flag;
+            while (flag.find("$TAG$") != std::string::npos)
+            {
+               flag.replace(flag.find("$TAG$"), 5, tag);
+            }
+
+            world.AddTagAlias(TagAlias{
+                .alias = alias_tag,
+                .original_tag = tag,
+                .flag = flag,
+            });
+
+            std::string identifier = alias_definition.alias_identifier;
+            while (identifier.find("$TAG$") != std::string::npos)
+            {
+               identifier.replace(identifier.find("$TAG$"), 5, tag);
+            }
+            aliases.emplace(identifier, alias_tag);
+         }
+      }
+   }
+
+   // Apply stories
+   for (const auto& [tag, country_roles]: stories)
    {
       auto country_itr = modifiable_countries.find(tag);
       if (country_itr == modifiable_countries.end())
@@ -345,32 +442,130 @@ hoi4::World hoi4::ConvertWorld(const commonItems::ModFilesystem& hoi4_mod_filesy
          continue;
       }
 
+      std::set<std::string> role_names;
+      std::ranges::for_each(country_roles, [&role_names](const Role& role) {
+         role_names.insert(role.GetName());
+      });
+      country_itr->second.SetRoles(role_names);
+
       for (const Role& country_role: country_roles)
       {
          for (const DecisionsCategory& role_category: country_role.GetDecisionsCategories())
          {
-            decisions_categories.insert(role_category);
+            DecisionsCategory updated_role_category = role_category;
+            while (updated_role_category.name.find("$TAG$") != std::string::npos)
+            {
+               updated_role_category.name.replace(updated_role_category.name.find("$TAG$"), 5, tag);
+            }
+            while (updated_role_category.allowed.find("$TAG$") != std::string::npos)
+            {
+               updated_role_category.allowed.replace(updated_role_category.allowed.find("$TAG$"), 5, tag);
+            }
+            decisions_categories.insert(updated_role_category);
          }
          for (const auto& [category, decisions]: country_role.GetDecisionsInCategories())
          {
-            decisions_in_categories.emplace(category, decisions);
+            std::string updated_category = category;
+            while (updated_category.find("$TAG$") != std::string::npos)
+            {
+               updated_category.replace(updated_category.find("$TAG$"), 5, tag);
+            }
+            std::vector<Decision> updated_decisions;
+            for (const Decision& decision: decisions)
+            {
+               Decision updated_decision = decision;
+               while (updated_decision.name.find("$TAG$") != std::string::npos)
+               {
+                  updated_decision.name.replace(updated_decision.name.find("$TAG$"), 5, tag);
+               }
+               while (updated_decision.name_field.find("$TAG$") != std::string::npos)
+               {
+                  updated_decision.name_field.replace(updated_decision.name_field.find("$TAG$"), 5, tag);
+               }
+               while (updated_decision.visible.find("$TAG$") != std::string::npos)
+               {
+                  updated_decision.visible.replace(updated_decision.visible.find("$TAG$"), 5, tag);
+               }
+               while (updated_decision.target_trigger.find("$TAG$") != std::string::npos)
+               {
+                  updated_decision.target_trigger.replace(updated_decision.target_trigger.find("$TAG$"), 5, tag);
+               }
+               while (updated_decision.remove_effect.find("$TAG$") != std::string::npos)
+               {
+                  updated_decision.remove_effect.replace(updated_decision.remove_effect.find("$TAG$"), 5, tag);
+               }
+               updated_decisions.push_back(updated_decision);
+            }
+            decisions_in_categories.emplace(updated_category, updated_decisions);
          }
          for (const Event& event: country_role.GetEvents())
          {
-            if (auto [itr, success] = country_events.emplace(tag, std::vector{event}); !success)
+            Event updated_event = event;
+            while (updated_event.id.find("$TAG$") != std::string::npos)
             {
-               itr->second.push_back(event);
+               updated_event.id.replace(updated_event.id.find("$TAG$"), 5, tag);
             }
+            while (updated_event.event_namespace.find("$TAG$") != std::string::npos)
+            {
+               updated_event.event_namespace.replace(updated_event.event_namespace.find("$TAG$"), 5, tag);
+            }
+            if (updated_event.title)
+            {
+               while (updated_event.title->find("$TAG$") != std::string::npos)
+               {
+                  updated_event.title->replace(updated_event.title->find("$TAG$"), 5, tag);
+               }
+            }
+            for (std::string& description: updated_event.descriptions)
+            {
+               while (description.find("$TAG$") != std::string::npos)
+               {
+                  description.replace(description.find("$TAG$"), 5, tag);
+               }
+            }
+            for (EventOption& option: updated_event.options)
+            {
+               while (option.name.find("$TAG$") != std::string::npos)
+               {
+                  option.name.replace(option.name.find("$TAG$"), 5, tag);
+               }
+               while (option.hidden_effect.find("$TAG$") != std::string::npos)
+               {
+                  option.hidden_effect.replace(option.hidden_effect.find("$TAG$"), 5, tag);
+               }
+               for (std::string& script_block: option.script_blocks)
+               {
+                  while (script_block.find("$TAG$") != std::string::npos)
+                  {
+                     script_block.replace(script_block.find("$TAG$"), 5, tag);
+                  }
+               }
+            }
+            if (auto [itr, success] = country_events.emplace(updated_event.event_namespace, std::vector{updated_event});
+                !success)
+            {
+               itr->second.push_back(updated_event);
+            }
+         }
+         for (const std::string& scripted_effect: country_role.GetScriptedEffects())
+         {
+            std::string updated_scripted_effect = scripted_effect;
+            while (updated_scripted_effect.find("$TAG$") != std::string::npos)
+            {
+               updated_scripted_effect.replace(updated_scripted_effect.find("$TAG$"), 5, tag);
+            }
+            scripted_effects.push_back(updated_scripted_effect);
          }
       }
 
-      const FocusTree tree = AssembleTree(country_roles, tag, world);
+      const FocusTree tree = AssembleTree(country_roles, tag, aliases, world);
       country_itr->second.SetFocusTree(tree);
    }
 
    world.SetDecisionsCategories(decisions_categories);
    world.SetDecisions(decisions_in_categories);
    world.SetCountryEvents(country_events);
+   world.SetScriptedEffects(scripted_effects);
 
    return world;
 }

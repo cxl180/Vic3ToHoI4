@@ -14,26 +14,26 @@ void ConvoyDistributor::CalculateStateWeights(const vic3::World& source_world)
    vic3_map_ = {};
    for (const auto [id, state]: states)
    {
-      const auto building = buildings.GetBuildingInState(id, vic3::BuildingType::Port);
+      const auto building = buildings.GetBuildingInState(id, vic3::kBuildingTypePort);
       if (!building)
       {
          continue;
       }
       const auto& methods = building->GetProductionMethods();
-      float pmWeight = 0;
-      for (const auto pm: methods)
+      float pm_weight = 0;
+      for (const auto production_method: methods)
       {
-         if (!pm_weights_.contains(pm))
+         if (!pm_weights_.contains(production_method))
          {
-            Log(LogLevel::Warning) << "Unhandled port production method \"" << pm << "\"";
+            Log(LogLevel::Warning) << "Unhandled port production method \"" << production_method << "\"";
             continue;
          }
-         pmWeight = pm_weights_[pm];
+         pm_weight = pm_weights_[production_method];
          break;
       }
-      auto stateWeight = building->GetStaffingLevel() * pmWeight;
-      vic3_total_ += stateWeight;
-      vic3_map_[id] = stateWeight;
+      auto state_weight = building->GetStaffingLevel() * pm_weight;
+      vic3_total_ += state_weight;
+      vic3_map_[id] = state_weight;
    }
 }
 
@@ -48,7 +48,7 @@ int ConvoyDistributor::ConvoysFromState(int id) const
       return 0;
    }
    auto weight = vic3_map_.at(id);
-   weight *= hoi4_total_;
+   weight *= static_cast<float>(hoi4_total_);
    weight /= vic3_total_;
    return static_cast<int>(std::round(weight));
 }

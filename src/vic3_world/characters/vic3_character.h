@@ -27,7 +27,7 @@ struct CharacterOptions
    std::set<std::string> traits;
    std::string origin_tag;
    std::optional<int> origin_country_id;
-   std::optional<int> formation_id;
+   std::optional<int64_t> formation_id;
 };
 
 class Character
@@ -58,7 +58,7 @@ class Character
    [[nodiscard]] int GetCultureId() const { return culture_id_; }
    [[nodiscard]] const std::string& GetCulture() const { return culture_; }
    [[nodiscard]] bool IsFemale() const { return is_female_; }
-   [[nodiscard]] int GetIgId() const { return rank_; }
+   [[nodiscard]] int GetIgId() const { return ig_id_; }
    [[nodiscard]] const std::set<std::string>& GetRoles() const { return roles_; }
    [[nodiscard]] int GetRank() const { return rank_; }
    [[nodiscard]] const std::string& GetIdeology() const { return ideology_; }
@@ -91,7 +91,7 @@ class Character
    std::set<std::string> traits_;
    std::string origin_tag_;  // Where an agitator was exiled from, resolve to ID before HoI
    std::optional<int> origin_country_id_;
-   std::optional<int> formation_id_;  // Commanders with formations are actively hired to lead boats/troops
+   std::optional<int64_t> formation_id_;  // Commanders with formations are actively hired to lead boats/troops
 };
 }  // namespace vic3
 

@@ -13,7 +13,7 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldCountriesCountryConverter, SourceCountryNumberIsFromSourceCountry)
+TEST(Hoi4worldCountriesCountryConverter, SourceCountryNumberIsFromSourceCountry)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "T00"}, {2, "T01"}});
@@ -39,6 +39,7 @@ TEST(Hoi4worldCountriesCountryConverter, SourceCountryNumberIsFromSourceCountry)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -59,19 +60,20 @@ TEST(Hoi4worldCountriesCountryConverter, SourceCountryNumberIsFromSourceCountry)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetSourceCountryNumber(), 1);
+   EXPECT_EQ(country_one.value_or(Country({})).GetSourceCountryNumber(), 1);
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_EQ(country_two->GetSourceCountryNumber(), 2);
+   EXPECT_EQ(country_two.value_or(Country({})).GetSourceCountryNumber(), 2);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, TagIsFromSourceCountry)
+TEST(Hoi4worldCountriesCountryConverter, TagIsFromSourceCountry)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "T00"}, {2, "T01"}});
@@ -97,6 +99,7 @@ TEST(Hoi4worldCountriesCountryConverter, TagIsFromSourceCountry)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -117,21 +120,22 @@ TEST(Hoi4worldCountriesCountryConverter, TagIsFromSourceCountry)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetTag(), "T00");
-   EXPECT_EQ(country_one->GetColor(), commonItems::Color(std::array{1, 2, 3}));
+   EXPECT_EQ(country_one.value_or(Country({})).GetTag(), "T00");
+   EXPECT_EQ(country_one.value_or(Country({})).GetColor(), commonItems::Color(std::array{1, 2, 3}));
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_EQ(country_two->GetTag(), "T01");
-   EXPECT_EQ(country_two->GetColor(), commonItems::Color(std::array{2, 4, 6}));
+   EXPECT_EQ(country_two.value_or(Country({})).GetTag(), "T01");
+   EXPECT_EQ(country_two.value_or(Country({})).GetColor(), commonItems::Color(std::array{2, 4, 6}));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoSourceTag)
+TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoSourceTag)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper(std::map<int, std::string>{
        {1, "T00"},
@@ -158,6 +162,7 @@ TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoSourceTag)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -168,7 +173,7 @@ TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoSourceTag)
 
 
 
-TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoTagMapping)
+TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoTagMapping)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper;
@@ -193,6 +198,7 @@ TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoTagMapping)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -202,7 +208,69 @@ TEST(Hoi4worldCountriesCountryConverter, NoCountryIfNoTagMapping)
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, CapitalStatesAreConverted)
+TEST(Hoi4worldCountriesCountryConverter, OwnedStatesAreConverted)  // NOLINT(cert-err58-cpp)
+{
+   const vic3::World source_world = vic3::World(vic3::WorldOptions());
+   const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
+   const vic3::Country source_country_one({.number = 1, .owned_states = {1, 2, 3}});
+   const vic3::Country source_country_two({.number = 2, .owned_states = {4, 5, 6}});
+   std::map<int, Character> dummy_characters;
+   std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
+   mappers::TemplateMap templates;
+
+   const States states({.vic3_state_ids_to_hoi4_state_ids{{1, 10}, {2, 20}, {3, 30}, {4, 40}, {5, 50}, {6, 60}}});
+
+   const auto country_one = ConvertCountry(source_world,
+       source_country_one,
+       commonItems::LocalizationDatabase{{}, {}},
+       country_mapper,
+       states,
+       mappers::IdeologyMapper({}, {}),
+       mappers::UnitMapper(templates),
+       {},
+       {},
+       {},
+       {},
+       {},
+       {},
+       mappers::CultureGraphicsMapper{{}},
+       mappers::LeaderTypeMapper({}),
+       mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
+       {0, {}},
+       {},
+       dummy_characters,
+       dummy_culture_queues);
+   const auto country_two = ConvertCountry(source_world,
+       source_country_two,
+       commonItems::LocalizationDatabase{{}, {}},
+       country_mapper,
+       states,
+       mappers::IdeologyMapper({}, {}),
+       mappers::UnitMapper(templates),
+       {},
+       {},
+       {},
+       {},
+       {},
+       {},
+       mappers::CultureGraphicsMapper{{}},
+       mappers::LeaderTypeMapper({}),
+       mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
+       {0, {}},
+       {},
+       dummy_characters,
+       dummy_culture_queues);
+
+   ASSERT_TRUE(country_one.has_value());
+   EXPECT_THAT(country_one.value_or(Country({})).GetOwnedStates(), testing::UnorderedElementsAre(10, 20, 30));
+   ASSERT_TRUE(country_two.has_value());
+   EXPECT_THAT(country_two.value_or(Country({})).GetOwnedStates(), testing::UnorderedElementsAre(40, 50, 60));
+}
+
+
+TEST(Hoi4worldCountriesCountryConverter, CapitalStatesAreConverted)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -230,6 +298,7 @@ TEST(Hoi4worldCountriesCountryConverter, CapitalStatesAreConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -250,19 +319,20 @@ TEST(Hoi4worldCountriesCountryConverter, CapitalStatesAreConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::optional(4));
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::optional(4));
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_EQ(country_two->GetCapitalState(), std::optional(9));
+   EXPECT_EQ(country_two.value_or(Country({})).GetCapitalState(), std::optional(9));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, NoCapitalStateIfNoSourceCapitalState)
+TEST(Hoi4worldCountriesCountryConverter, NoCapitalStateIfNoSourceCapitalState)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -291,17 +361,18 @@ TEST(Hoi4worldCountriesCountryConverter, NoCapitalStateIfNoSourceCapitalState)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::nullopt);
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::nullopt);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, NoCapitalStateIfNoStateMappingAndNoStates)
+TEST(Hoi4worldCountriesCountryConverter, NoCapitalStateIfNoStateMappingAndNoStates)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -326,17 +397,18 @@ TEST(Hoi4worldCountriesCountryConverter, NoCapitalStateIfNoStateMappingAndNoStat
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::nullopt);
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::nullopt);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, HighestVpStateBecomesCapitalIfCapitalNotConverted)
+TEST(Hoi4worldCountriesCountryConverter, HighestVpStateBecomesCapitalIfCapitalNotConverted)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -366,17 +438,18 @@ TEST(Hoi4worldCountriesCountryConverter, HighestVpStateBecomesCapitalIfCapitalNo
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::optional(2));
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::optional(2));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, HighestIndustryStateBecomesCapitalIfVpsAreSame)
+TEST(Hoi4worldCountriesCountryConverter, HighestIndustryStateBecomesCapitalIfVpsAreSame)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -406,16 +479,18 @@ TEST(Hoi4worldCountriesCountryConverter, HighestIndustryStateBecomesCapitalIfVps
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::optional(2));
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::optional(2));
 }
 
 
+// NOLINTNEXTLINE(cert-err58-cpp)
 TEST(Hoi4worldCountriesCountryConverter, HighestManpowerStateBecomesCapitalIfIndustriesAreSame)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -446,17 +521,18 @@ TEST(Hoi4worldCountriesCountryConverter, HighestManpowerStateBecomesCapitalIfInd
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::optional(2));
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::optional(2));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, LowestIdStateBecomesCapitalIfManpowersAreSame)
+TEST(Hoi4worldCountriesCountryConverter, LowestIdStateBecomesCapitalIfManpowersAreSame)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -486,17 +562,18 @@ TEST(Hoi4worldCountriesCountryConverter, LowestIdStateBecomesCapitalIfManpowersA
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::optional(1));
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::optional(1));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, StatesNotOwnedByCountryCannotBecomeCapital)
+TEST(Hoi4worldCountriesCountryConverter, StatesNotOwnedByCountryCannotBecomeCapital)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -525,17 +602,18 @@ TEST(Hoi4worldCountriesCountryConverter, StatesNotOwnedByCountryCannotBecomeCapi
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetCapitalState(), std::nullopt);
+   EXPECT_EQ(country_one.value_or(Country({})).GetCapitalState(), std::nullopt);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, PrimaryCulturesAreCopied)
+TEST(Hoi4worldCountriesCountryConverter, PrimaryCulturesAreCopied)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
@@ -560,17 +638,19 @@ TEST(Hoi4worldCountriesCountryConverter, PrimaryCulturesAreCopied)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetPrimaryCultures(), testing::UnorderedElementsAre("culture_one", "culture_two"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetPrimaryCultures(),
+       testing::UnorderedElementsAre("culture_one", "culture_two"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, NonDemocraciesPickSentinelElectionYear)
+TEST(Hoi4worldCountriesCountryConverter, NonDemocraciesPickSentinelElectionYear)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -595,17 +675,18 @@ TEST(Hoi4worldCountriesCountryConverter, NonDemocraciesPickSentinelElectionYear)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one.value().GetLastElection(), date("1933.1.1"));
+   EXPECT_EQ(country_one.value_or(Country({})).GetLastElection(), date("1932.1.1"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, OutdatedElectionsExtrapolateToPresent)
+TEST(Hoi4worldCountriesCountryConverter, OutdatedElectionsExtrapolateToPresent)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -630,17 +711,18 @@ TEST(Hoi4worldCountriesCountryConverter, OutdatedElectionsExtrapolateToPresent)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one.value().GetLastElection(), date("1934.4.23"));
+   EXPECT_EQ(country_one.value_or(Country({})).GetLastElection(), date("1934.4.23"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, FutureElectionsFallbackToPresent)
+TEST(Hoi4worldCountriesCountryConverter, FutureElectionsFallbackToPresent)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -665,17 +747,18 @@ TEST(Hoi4worldCountriesCountryConverter, FutureElectionsFallbackToPresent)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one.value().GetLastElection(), date("1933.2.15"));
+   EXPECT_EQ(country_one.value_or(Country({})).GetLastElection(), date("1933.2.15"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, ContemporaryElectionsRemainUnchanged)
+TEST(Hoi4worldCountriesCountryConverter, ContemporaryElectionsRemainUnchanged)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -700,17 +783,18 @@ TEST(Hoi4worldCountriesCountryConverter, ContemporaryElectionsRemainUnchanged)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one.value().GetLastElection(), date("1935.11.4"));
+   EXPECT_EQ(country_one.value_or(Country({})).GetLastElection(), date("1935.11.4"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, InYearFutureElectionsAreCurrentCycle)
+TEST(Hoi4worldCountriesCountryConverter, InYearFutureElectionsAreCurrentCycle)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -735,17 +819,18 @@ TEST(Hoi4worldCountriesCountryConverter, InYearFutureElectionsAreCurrentCycle)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one.value().GetLastElection(), date("1932.10.14"));
+   EXPECT_EQ(country_one.value_or(Country({})).GetLastElection(), date("1932.10.14"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, InYearPastElectionsAreNextCycle)
+TEST(Hoi4worldCountriesCountryConverter, InYearPastElectionsAreNextCycle)  // NOLINT(cert-err58-cpp)
 {
    // When election is in the same year as the start date, kick it to next cycle when occurring on or before start date
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -771,17 +856,18 @@ TEST(Hoi4worldCountriesCountryConverter, InYearPastElectionsAreNextCycle)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one.value().GetLastElection(), date("1936.1.1"));
+   EXPECT_EQ(country_one.value_or(Country({})).GetLastElection(), date("1936.1.1"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, RulingIdeologyCanBeConverted)
+TEST(Hoi4worldCountriesCountryConverter, RulingIdeologyCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -813,6 +899,7 @@ TEST(Hoi4worldCountriesCountryConverter, RulingIdeologyCanBeConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -834,19 +921,20 @@ TEST(Hoi4worldCountriesCountryConverter, RulingIdeologyCanBeConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetIdeology(), "neutrality");
+   EXPECT_EQ(country_one.value_or(Country({})).GetIdeology(), "neutrality");
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_EQ(country_two->GetIdeology(), "democratic");
+   EXPECT_EQ(country_two.value_or(Country({})).GetIdeology(), "democratic");
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, SubIdeologyCanBeConverted)
+TEST(Hoi4worldCountriesCountryConverter, SubIdeologyCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -888,6 +976,7 @@ TEST(Hoi4worldCountriesCountryConverter, SubIdeologyCanBeConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -909,19 +998,20 @@ TEST(Hoi4worldCountriesCountryConverter, SubIdeologyCanBeConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetSubIdeology(), "despotism");
+   EXPECT_EQ(country_one.value_or(Country({})).GetSubIdeology(), "despotism");
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_EQ(country_two->GetSubIdeology(), "liberalism");
+   EXPECT_EQ(country_two.value_or(Country({})).GetSubIdeology(), "liberalism");
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, TechnologiesAreConverted)
+TEST(Hoi4worldCountriesCountryConverter, TechnologiesAreConverted)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world =
@@ -947,19 +1037,20 @@ TEST(Hoi4worldCountriesCountryConverter, TechnologiesAreConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetTechnologies().GetTechnologies(),
+   EXPECT_THAT(country_one.value_or(Country({})).GetTechnologies().GetTechnologies(),
        testing::UnorderedElementsAre(
            testing::Pair(std::nullopt, std::set<std::string>{"dest_tech_one", "dest_tech_two"})));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, VariantsRequireAllRequiredTechs)
+TEST(Hoi4worldCountriesCountryConverter, VariantsRequireAllRequiredTechs)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions({.acquired_technologies = {{1, {"source_tech"}}}}));
@@ -977,61 +1068,109 @@ TEST(Hoi4worldCountriesCountryConverter, VariantsRequireAllRequiredTechs)
        mappers::UnitMapper(templates),
        {{{"source_tech"}, std::nullopt, {"required_tech_one", "required_tech_two"}}},
        {
-           EquipmentVariant("legacy_ship: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("legacy_ship: missing_required_tech_fails", "", {"required_tech_missing"}, {}, {}),
-           EquipmentVariant("legacy_ship: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("legacy_ship: missing_and_present_required_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: no_required_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: missing_required_tech_fails"},
+               EquipmentVariantType{""},
+               {"required_tech_missing"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: missing_and_present_required_techs_fails"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_missing"},
                {},
                {}),
-           EquipmentVariant("legacy_ship: all_present_required_techs_succeeds",
-               "",
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {}),
        },
        {
-           EquipmentVariant("ship: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("ship: missing_required_tech_fails", "", {"required_tech_missing"}, {}, {}),
-           EquipmentVariant("ship: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("ship: missing_and_present_required_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"ship: no_required_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"ship: missing_required_tech_fails"},
+               EquipmentVariantType{""},
+               {"required_tech_missing"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"ship: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"ship: missing_and_present_required_techs_fails"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_missing"},
                {},
                {}),
-           EquipmentVariant("ship: all_present_required_techs_succeeds",
-               "",
+           EquipmentVariant(EquipmentVariantName{"ship: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {}),
        },
        {
-           EquipmentVariant("plane: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("plane: missing_required_tech_fails", "", {"required_tech_missing"}, {}, {}),
-           EquipmentVariant("plane: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("plane: missing_and_present_required_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"plane: no_required_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"plane: missing_required_tech_fails"},
+               EquipmentVariantType{""},
+               {"required_tech_missing"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"plane: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"plane: missing_and_present_required_techs_fails"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_missing"},
                {},
                {}),
-           EquipmentVariant("plane: all_present_required_techs_succeeds",
-               "",
+           EquipmentVariant(EquipmentVariantName{"plane: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {}),
        },
        {
-           EquipmentVariant("tank: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("tank: missing_required_tech_fails", "", {"required_tech_missing"}, {}, {}),
-           EquipmentVariant("tank: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("tank: missing_and_present_required_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"tank: no_required_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"tank: missing_required_tech_fails"},
+               EquipmentVariantType{""},
+               {"required_tech_missing"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"tank: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"tank: missing_and_present_required_techs_fails"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_missing"},
                {},
                {}),
-           EquipmentVariant("tank: all_present_required_techs_succeeds",
-               "",
+           EquipmentVariant(EquipmentVariantName{"tank: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {}),
@@ -1040,48 +1179,82 @@ TEST(Hoi4worldCountriesCountryConverter, VariantsRequireAllRequiredTechs)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetLegacyShipVariants(),
-       testing::ElementsAre(EquipmentVariant("legacy_ship: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("legacy_ship: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("legacy_ship: all_present_required_techs_succeeds",
-               "",
+   EXPECT_THAT(country_one.value_or(Country({})).GetLegacyShipVariants(),
+       testing::ElementsAre(
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: no_required_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {})));
-   EXPECT_THAT(country_one->GetShipVariants(),
-       testing::ElementsAre(EquipmentVariant("ship: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("ship: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("ship: all_present_required_techs_succeeds",
-               "",
+   EXPECT_THAT(country_one.value_or(Country({})).GetShipVariants(),
+       testing::ElementsAre(EquipmentVariant(EquipmentVariantName{"ship: no_required_techs_automatically_succeeds"},
+                                EquipmentVariantType{""},
+                                {},
+                                {},
+                                {}),
+           EquipmentVariant(EquipmentVariantName{"ship: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"ship: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {})));
-   EXPECT_THAT(country_one->GetPlaneVariants(),
-       testing::ElementsAre(EquipmentVariant("plane: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("plane: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("plane: all_present_required_techs_succeeds",
-               "",
+   EXPECT_THAT(country_one.value_or(Country({})).GetPlaneVariants(),
+       testing::ElementsAre(EquipmentVariant(EquipmentVariantName{"plane: no_required_techs_automatically_succeeds"},
+                                EquipmentVariantType{""},
+                                {},
+                                {},
+                                {}),
+           EquipmentVariant(EquipmentVariantName{"plane: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"plane: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {})));
-   EXPECT_THAT(country_one->GetTankVariants(),
-       testing::ElementsAre(EquipmentVariant("tank: no_required_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("tank: present_required_tech_succeeds", "", {"required_tech_one"}, {}, {}),
-           EquipmentVariant("tank: all_present_required_techs_succeeds",
-               "",
+   EXPECT_THAT(country_one.value_or(Country({})).GetTankVariants(),
+       testing::ElementsAre(EquipmentVariant(EquipmentVariantName{"tank: no_required_techs_automatically_succeeds"},
+                                EquipmentVariantType{""},
+                                {},
+                                {},
+                                {}),
+           EquipmentVariant(EquipmentVariantName{"tank: present_required_tech_succeeds"},
+               EquipmentVariantType{""},
+               {"required_tech_one"},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"tank: all_present_required_techs_succeeds"},
+               EquipmentVariantType{""},
                {"required_tech_one", "required_tech_two"},
                {},
                {})));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, VariantsBlockedByAnyBlockingTechs)
+TEST(Hoi4worldCountriesCountryConverter, VariantsBlockedByAnyBlockingTechs)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world =
@@ -1100,41 +1273,89 @@ TEST(Hoi4worldCountriesCountryConverter, VariantsBlockedByAnyBlockingTechs)
        mappers::UnitMapper(templates),
        {{{"source_tech"}, std::nullopt, {"blocking_tech_one", "blocking_tech_two"}}},
        {
-           EquipmentVariant("legacy_ship: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("legacy_ship: having_blocking_tech_fails", "", {}, {"blocking_tech_one"}, {}),
-           EquipmentVariant("legacy_ship: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {}),
-           EquipmentVariant("legacy_ship: missing_and_present_blocking_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: no_blocking_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: having_blocking_tech_fails"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_one"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: missing_and_present_blocking_techs_fails"},
+               EquipmentVariantType{""},
                {},
                {"blocking_tech_one", "blocking_tech_missing"},
                {}),
        },
        {
-           EquipmentVariant("ship: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("ship: having_blocking_tech_fails", "", {}, {"blocking_tech_one"}, {}),
-           EquipmentVariant("ship: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {}),
-           EquipmentVariant("ship: missing_and_present_blocking_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"ship: no_blocking_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"ship: having_blocking_tech_fails"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_one"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"ship: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"ship: missing_and_present_blocking_techs_fails"},
+               EquipmentVariantType{""},
                {},
                {"blocking_tech_one", "blocking_tech_missing"},
                {}),
        },
        {
-           EquipmentVariant("plane: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("plane: having_blocking_tech_fails", "", {}, {"blocking_tech_one"}, {}),
-           EquipmentVariant("plane: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {}),
-           EquipmentVariant("plane: missing_and_present_blocking_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"plane: no_blocking_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"plane: having_blocking_tech_fails"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_one"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"plane: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"plane: missing_and_present_blocking_techs_fails"},
+               EquipmentVariantType{""},
                {},
                {"blocking_tech_one", "blocking_tech_missing"},
                {}),
        },
        {
-           EquipmentVariant("tank: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("tank: having_blocking_tech_fails", "", {}, {"blocking_tech_one"}, {}),
-           EquipmentVariant("tank: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {}),
-           EquipmentVariant("tank: missing_and_present_blocking_techs_fails",
-               "",
+           EquipmentVariant(EquipmentVariantName{"tank: no_blocking_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"tank: having_blocking_tech_fails"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_one"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"tank: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"tank: missing_and_present_blocking_techs_fails"},
+               EquipmentVariantType{""},
                {},
                {"blocking_tech_one", "blocking_tech_missing"},
                {}),
@@ -1143,28 +1364,62 @@ TEST(Hoi4worldCountriesCountryConverter, VariantsBlockedByAnyBlockingTechs)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetLegacyShipVariants(),
-       testing::ElementsAre(EquipmentVariant("legacy_ship: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("legacy_ship: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {})));
-   EXPECT_THAT(country_one->GetShipVariants(),
-       testing::ElementsAre(EquipmentVariant("ship: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("ship: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {})));
-   EXPECT_THAT(country_one->GetPlaneVariants(),
-       testing::ElementsAre(EquipmentVariant("plane: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("plane: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {})));
-   EXPECT_THAT(country_one->GetTankVariants(),
-       testing::ElementsAre(EquipmentVariant("tank: no_blocking_techs_automatically_succeeds", "", {}, {}, {}),
-           EquipmentVariant("tank: missing_blocking_tech_succeeds", "", {}, {"blocking_tech_missing"}, {})));
+   EXPECT_THAT(country_one.value_or(Country({})).GetLegacyShipVariants(),
+       testing::ElementsAre(
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: no_blocking_techs_automatically_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {},
+               {}),
+           EquipmentVariant(EquipmentVariantName{"legacy_ship: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {})));
+   EXPECT_THAT(country_one.value_or(Country({})).GetShipVariants(),
+       testing::ElementsAre(EquipmentVariant(EquipmentVariantName{"ship: no_blocking_techs_automatically_succeeds"},
+                                EquipmentVariantType{""},
+                                {},
+                                {},
+                                {}),
+           EquipmentVariant(EquipmentVariantName{"ship: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {})));
+   EXPECT_THAT(country_one.value_or(Country({})).GetPlaneVariants(),
+       testing::ElementsAre(EquipmentVariant(EquipmentVariantName{"plane: no_blocking_techs_automatically_succeeds"},
+                                EquipmentVariantType{""},
+                                {},
+                                {},
+                                {}),
+           EquipmentVariant(EquipmentVariantName{"plane: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {})));
+   EXPECT_THAT(country_one.value_or(Country({})).GetTankVariants(),
+       testing::ElementsAre(EquipmentVariant(EquipmentVariantName{"tank: no_blocking_techs_automatically_succeeds"},
+                                EquipmentVariantType{""},
+                                {},
+                                {},
+                                {}),
+           EquipmentVariant(EquipmentVariantName{"tank: missing_blocking_tech_succeeds"},
+               EquipmentVariantType{""},
+               {},
+               {"blocking_tech_missing"},
+               {})));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, LawsDefaultsToDefaultLaws)
+TEST(Hoi4worldCountriesCountryConverter, LawsDefaultsToDefaultLaws)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -1189,18 +1444,19 @@ TEST(Hoi4worldCountriesCountryConverter, LawsDefaultsToDefaultLaws)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetLaws(),
+   EXPECT_THAT(country_one.value_or(Country({})).GetLaws(),
        testing::UnorderedElementsAre("civilian_economy", "export_focus", "volunteer_only"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, FascistCountriesGetDifferentEconomicIdeas)
+TEST(Hoi4worldCountriesCountryConverter, FascistCountriesGetDifferentEconomicIdeas)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -1225,18 +1481,19 @@ TEST(Hoi4worldCountriesCountryConverter, FascistCountriesGetDifferentEconomicIde
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetLaws(),
+   EXPECT_THAT(country_one.value_or(Country({})).GetLaws(),
        testing::UnorderedElementsAre("partial_economic_mobilisation", "limited_exports", "volunteer_only"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, MassConscriptionLeadsToLimitedConscription)
+TEST(Hoi4worldCountriesCountryConverter, MassConscriptionLeadsToLimitedConscription)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
@@ -1263,18 +1520,19 @@ TEST(Hoi4worldCountriesCountryConverter, MassConscriptionLeadsToLimitedConscript
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetLaws(),
+   EXPECT_THAT(country_one.value_or(Country({})).GetLaws(),
        testing::UnorderedElementsAre("civilian_economy", "export_focus", "limited_conscription"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, IdeasDefaultToEmpty)
+TEST(Hoi4worldCountriesCountryConverter, IdeasDefaultToEmpty)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -1299,16 +1557,17 @@ TEST(Hoi4worldCountriesCountryConverter, IdeasDefaultToEmpty)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_TRUE(country_one->GetIdeas().empty());
+   EXPECT_TRUE(country_one.value_or(Country({})).GetIdeas().empty());
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, DecentralizedCountriesGetDecentralizedIdeas)
+TEST(Hoi4worldCountriesCountryConverter, DecentralizedCountriesGetDecentralizedIdeas)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -1333,16 +1592,17 @@ TEST(Hoi4worldCountriesCountryConverter, DecentralizedCountriesGetDecentralizedI
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetIdeas(), testing::UnorderedElementsAre("decentralized"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetIdeas(), testing::UnorderedElementsAre("decentralized"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, OnlyConservativeMonarchiesHaveNobleLeaders)
+TEST(Hoi4worldCountriesCountryConverter, OnlyConservativeMonarchiesHaveNobleLeaders)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
 
@@ -1356,17 +1616,15 @@ TEST(Hoi4worldCountriesCountryConverter, OnlyConservativeMonarchiesHaveNobleLead
    std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
    mappers::TemplateMap templates;
 
-   const vic3::CultureDefinition culture_def{"culture",
-       {
+   const vic3::CultureDefinition culture_def({.name = "culture",
+       .name_list = {
            .male_common_first = {"president"},
            .female_common_first = {"presidentin"},
            .common_last = {"doe"},
            .noble_last = {"von Doe"},
            .male_regal_first = {"king0", "king1", "king2", "king3", "king4"},
            .female_regal_first = {"queen0", "queen1", "queen2", "queen3", "queen4"},
-       },
-       {},
-       {}};
+       }});
    const std::map<std::string, vic3::CultureDefinition> culture_definitions{{"culture", culture_def}};
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.culture_definitions = culture_definitions});
 
@@ -1410,6 +1668,7 @@ TEST(Hoi4worldCountriesCountryConverter, OnlyConservativeMonarchiesHaveNobleLead
        mappers::CultureGraphicsMapper{{}},
        leader_type_mapper,
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -1431,26 +1690,27 @@ TEST(Hoi4worldCountriesCountryConverter, OnlyConservativeMonarchiesHaveNobleLead
        mappers::CultureGraphicsMapper{{}},
        leader_type_mapper,
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetSubIdeology(), "despotism");
-   EXPECT_THAT(country_one->GetNameList().male_names,
+   EXPECT_EQ(country_one.value_or(Country({})).GetSubIdeology(), "despotism");
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().male_names,
        testing::ElementsAre("king0", "king1", "king2", "king3", "king4"));
-   EXPECT_THAT(country_one->GetNameList().female_names,
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().female_names,
        testing::ElementsAre("queen0", "queen1", "queen2", "queen3", "queen4"));
-   EXPECT_THAT(country_one->GetNameList().surnames, testing::ElementsAre("von Doe"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().surnames, testing::ElementsAre("von Doe"));
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_THAT(country_two->GetNameList().male_names, testing::ElementsAre("president"));
-   EXPECT_THAT(country_two->GetNameList().female_names, testing::ElementsAre("presidentin"));
-   EXPECT_THAT(country_two->GetNameList().surnames, testing::ElementsAre("doe"));
+   EXPECT_THAT(country_two.value_or(Country({})).GetNameList().male_names, testing::ElementsAre("president"));
+   EXPECT_THAT(country_two.value_or(Country({})).GetNameList().female_names, testing::ElementsAre("presidentin"));
+   EXPECT_THAT(country_two.value_or(Country({})).GetNameList().surnames, testing::ElementsAre("doe"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, UndefinedNobleFirstsDefaultToCommon)
+TEST(Hoi4worldCountriesCountryConverter, UndefinedNobleFirstsDefaultToCommon)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one(
@@ -1459,14 +1719,12 @@ TEST(Hoi4worldCountriesCountryConverter, UndefinedNobleFirstsDefaultToCommon)
    std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
    mappers::TemplateMap templates;
 
-   const vic3::CultureDefinition culture_def{"culture",
-       {
+   const vic3::CultureDefinition culture_def({.name = "culture",
+       .name_list = {
            .male_common_first = {"president"},
            .female_common_first = {"presidentin"},
            .noble_last = {"von Doe"},
-       },
-       {},
-       {}};
+       }});
    const std::map<std::string, vic3::CultureDefinition> culture_definitions{{"culture", culture_def}};
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.culture_definitions = culture_definitions});
    commonItems::LocalizationDatabase locs("english", {});
@@ -1494,19 +1752,20 @@ TEST(Hoi4worldCountriesCountryConverter, UndefinedNobleFirstsDefaultToCommon)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetNameList().male_names, testing::ElementsAre("president"));
-   EXPECT_THAT(country_one->GetNameList().female_names, testing::ElementsAre("presidentin"));
-   EXPECT_THAT(country_one->GetNameList().surnames, testing::ElementsAre("von Doe"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().male_names, testing::ElementsAre("president"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().female_names, testing::ElementsAre("presidentin"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().surnames, testing::ElementsAre("von Doe"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, TooFewNobleFirstsAddsCommonFirsts)
+TEST(Hoi4worldCountriesCountryConverter, TooFewNobleFirstsAddsCommonFirsts)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one(
@@ -1515,16 +1774,14 @@ TEST(Hoi4worldCountriesCountryConverter, TooFewNobleFirstsAddsCommonFirsts)
    std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
    mappers::TemplateMap templates;
 
-   const vic3::CultureDefinition culture_def{"culture",
-       {
+   const vic3::CultureDefinition culture_def({.name = "culture",
+       .name_list = {
            .male_common_first = {"president"},
            .female_common_first = {"presidentin"},
            .noble_last = {"von Doe"},
            .male_regal_first = {"king"},
            .female_regal_first = {"queen"},
-       },
-       {},
-       {}};
+       }});
    const std::map<std::string, vic3::CultureDefinition> culture_definitions{{"culture", culture_def}};
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.culture_definitions = culture_definitions});
    commonItems::LocalizationDatabase locs("english", {});
@@ -1552,19 +1809,22 @@ TEST(Hoi4worldCountriesCountryConverter, TooFewNobleFirstsAddsCommonFirsts)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetNameList().male_names, testing::UnorderedElementsAre("president", "king"));
-   EXPECT_THAT(country_one->GetNameList().female_names, testing::UnorderedElementsAre("presidentin", "queen"));
-   EXPECT_THAT(country_one->GetNameList().surnames, testing::ElementsAre("von Doe"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().male_names,
+       testing::UnorderedElementsAre("president", "king"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().female_names,
+       testing::UnorderedElementsAre("presidentin", "queen"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().surnames, testing::ElementsAre("von Doe"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsUseSentinielValue)
+TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsUseSentinielValue)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one({.number = 1, .active_laws = {}, .primary_cultures = {"culture"}});
@@ -1572,7 +1832,7 @@ TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsUseSentinielValue)
    std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
    mappers::TemplateMap templates;
 
-   const vic3::CultureDefinition culture_def{"culture", {.male_common_first = {"president"}}, {}, {}};
+   const vic3::CultureDefinition culture_def({.name = "culture", .name_list = {.male_common_first = {"president"}}});
    const std::map<std::string, vic3::CultureDefinition> culture_definitions{{"culture", culture_def}};
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.culture_definitions = culture_definitions});
    commonItems::LocalizationDatabase locs("english", {});
@@ -1593,18 +1853,19 @@ TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsUseSentinielValue)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetNameList().male_names, testing::ElementsAre("John"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetNameList().male_names, testing::ElementsAre("John"));
 }
 
 
 
-TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsLogWarning)
+TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsLogWarning)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
    std::streambuf* cout_buffer = std::cout.rdbuf();
@@ -1616,7 +1877,7 @@ TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsLogWarning)
    std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
    mappers::TemplateMap templates;
 
-   const vic3::CultureDefinition culture_def{"culture", {.male_common_first = {"president"}}, {}, {}};
+   const vic3::CultureDefinition culture_def({.name = "culture", .name_list = {.male_common_first = {"president"}}});
    const std::map<std::string, vic3::CultureDefinition> culture_definitions{{"culture", culture_def}};
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.culture_definitions = culture_definitions});
    commonItems::LocalizationDatabase locs("english", {});
@@ -1637,6 +1898,7 @@ TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsLogWarning)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -1648,7 +1910,7 @@ TEST(Hoi4worldCountriesCountryConverter, MissingNameLocsLogWarning)
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, GraphicsBlocksAreSet)
+TEST(Hoi4worldCountriesCountryConverter, GraphicsBlocksAreSet)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one({.number = 1, .active_laws = {}, .primary_cultures = {"culture"}});
@@ -1656,11 +1918,15 @@ TEST(Hoi4worldCountriesCountryConverter, GraphicsBlocksAreSet)
    std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
    mappers::TemplateMap templates;
 
-   const vic3::CultureDefinition culture_def{"culture", {}, {}, {}};
+   const vic3::CultureDefinition culture_def({.name = "culture"});
    const std::map<std::string, vic3::CultureDefinition> culture_definitions{{"culture", culture_def}};
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.culture_definitions = culture_definitions});
-   const mappers::CultureGraphicsMapper culture_graphics_mapper{
-       {{{"culture"}, {}, {}, {{{"army", {"GFX_general"}}}, {}, {}}}}};
+   const mappers::CultureGraphicsMapper culture_graphics_mapper({
+       mappers::CultureGraphicsMapping{
+           .cultures = {"culture"},
+           .graphics_block = {.portrait_paths = {{"army", {"GFX_general"}}}},
+       },
+   });
 
    const std::optional<Country> country_one = ConvertCountry(source_world,
        source_country_one,
@@ -1678,17 +1944,19 @@ TEST(Hoi4worldCountriesCountryConverter, GraphicsBlocksAreSet)
        culture_graphics_mapper,
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetGraphicsBlock().portrait_paths.at("army"), testing::ElementsAre("GFX_general"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetGraphicsBlock().portrait_paths.at("army"),
+       testing::ElementsAre("GFX_general"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, PuppetsAreConverted)
+TEST(Hoi4worldCountriesCountryConverter, PuppetsAreConverted)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
    std::streambuf* cout_buffer = std::cout.rdbuf();
@@ -1722,6 +1990,7 @@ TEST(Hoi4worldCountriesCountryConverter, PuppetsAreConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -1742,22 +2011,23 @@ TEST(Hoi4worldCountriesCountryConverter, PuppetsAreConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetPuppets(), std::set<std::string>({"T01"}));
+   EXPECT_EQ(country_one.value_or(Country({})).GetPuppets(), std::set<std::string>({"T01"}));
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_EQ(country_two->GetPuppets(), std::set<std::string>());
+   EXPECT_EQ(country_two.value_or(Country({})).GetPuppets(), std::set<std::string>());
    std::cout.rdbuf(cout_buffer);
    EXPECT_THAT(log.str(),
        testing::HasSubstr(R"([ERROR] Invalid subject relationship between 1 and nonexistent country 50)"));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, OverlordIsConverted)
+TEST(Hoi4worldCountriesCountryConverter, OverlordIsConverted)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "T00"}, {2, "T01"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
@@ -1787,6 +2057,7 @@ TEST(Hoi4worldCountriesCountryConverter, OverlordIsConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -1807,19 +2078,20 @@ TEST(Hoi4worldCountriesCountryConverter, OverlordIsConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetOverlord(), std::make_optional("T01"));
+   EXPECT_EQ(country_one.value_or(Country({})).GetOverlord(), std::make_optional("T01"));
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_EQ(country_two->GetOverlord(), std::nullopt);
+   EXPECT_EQ(country_two.value_or(Country({})).GetOverlord(), std::nullopt);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, SpiesAndLeadersAreSeparated)
+TEST(Hoi4worldCountriesCountryConverter, SpiesAndLeadersAreSeparated)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
 
@@ -1852,18 +2124,19 @@ TEST(Hoi4worldCountriesCountryConverter, SpiesAndLeadersAreSeparated)
        mappers::CultureGraphicsMapper({}),
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetLeaderIds(), testing::ElementsAre(1, 3));
-   EXPECT_THAT(country_one->GetSpyIds(), testing::ElementsAre(2));
+   EXPECT_THAT(country_one.value_or(Country({})).GetLeaderIds(), testing::ElementsAre(1, 3));
+   EXPECT_THAT(country_one.value_or(Country({})).GetSpyIds(), testing::ElementsAre(2));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, CharactersConvert)
+TEST(Hoi4worldCountriesCountryConverter, CharactersConvert)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "TWO"}});
 
@@ -1896,6 +2169,7 @@ TEST(Hoi4worldCountriesCountryConverter, CharactersConvert)
        mappers::CultureGraphicsMapper({}),
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        characters,
@@ -1927,7 +2201,7 @@ TEST(Hoi4worldCountriesCountryConverter, CharactersConvert)
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, IdeologySupportIsConverted)
+TEST(Hoi4worldCountriesCountryConverter, IdeologySupportIsConverted)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one({.number = 1, .capital_state = 2, .ig_ids = {1, 2}});
@@ -1938,36 +2212,46 @@ TEST(Hoi4worldCountriesCountryConverter, IdeologySupportIsConverted)
    const States states({.vic3_state_ids_to_hoi4_state_ids{{2, 4}}});
 
    std::map<int, vic3::InterestGroup> igs;
-   igs.insert(
-       {1, vic3::InterestGroup("test_group_one", 1, 0, 50.F, false, {"test_ideology_one", "test_ideology_two"})});
-   igs.insert(
-       {2, vic3::InterestGroup("test_group_two", 1, 0, 150.F, false, {"test_ideology_one", "test_ideology_three"})});
+   igs.insert({1,
+       vic3::InterestGroup("test_group_one",
+           InterestGroupCountryId{1},
+           InterestGroupLeader{0},
+           InterestGroupClout{50.F},
+           InterestGroupInGovernment{false},
+           {"test_ideology_one", "test_ideology_two"})});
+   igs.insert({2,
+       vic3::InterestGroup("test_group_two",
+           InterestGroupCountryId{1},
+           InterestGroupLeader{0},
+           InterestGroupClout{150.F},
+           InterestGroupInGovernment{false},
+           {"test_ideology_one", "test_ideology_three"})});
 
    vic3::Ideologies ideologies = vic3::Ideologies({
        {"test_ideology_one", vic3::Ideology({{"test_law_one", 1}})},
        {"test_ideology_two", vic3::Ideology({{"test_law_two", 2}})},
        {"test_ideology_three", vic3::Ideology({{"test_law_three", -2}})},
    });
-   vic3::WorldOptions worldOptions = vic3::WorldOptions{
+   vic3::WorldOptions world_options = vic3::WorldOptions{
        .igs = igs,
        .ideologies = ideologies,
    };
 
-   vic3::World source_world = vic3::World(worldOptions);
+   vic3::World source_world = vic3::World(world_options);
 
-   mappers::ItemToPointsMap pointsMap;
-   pointsMap.insert({"test_law_one", {{"democratic", 2}, {"fascist", 3}, {"neutrality", 0}}});
-   pointsMap.insert({"test_law_two",
+   mappers::ItemToPointsMap points_map;
+   points_map.insert({"test_law_one", {{"democratic", 2}, {"fascist", 3}, {"neutrality", 0}}});
+   points_map.insert({"test_law_two",
        {
            {"communist", 5},
            {"fascist", 3},
        }});
-   pointsMap.insert({"test_law_three",
+   points_map.insert({"test_law_three",
        {
            {"democratic", 5},
            {"communist", 7},
        }});
-   const mappers::IdeologyMapper ideologyMapper = mappers::IdeologyMapper(pointsMap, {});
+   const mappers::IdeologyMapper ideology_mapper = mappers::IdeologyMapper(points_map, {});
 
    // TG1 has testlaw1: support, testlaw2: strong support
    // TG2 has testlaw1: support, testlaw3: strongly oppose
@@ -1984,7 +2268,7 @@ TEST(Hoi4worldCountriesCountryConverter, IdeologySupportIsConverted)
        commonItems::LocalizationDatabase{{}, {}},
        country_mapper,
        states,
-       ideologyMapper,
+       ideology_mapper,
        mappers::UnitMapper(templates),
        {},
        {},
@@ -1995,13 +2279,14 @@ TEST(Hoi4worldCountriesCountryConverter, IdeologySupportIsConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetIdeologySupport(),
+   EXPECT_THAT(country_one.value_or(Country({})).GetIdeologySupport(),
        testing::UnorderedElementsAre(testing::Pair("democratic", 10),
            testing::Pair("communist", 0),
            testing::Pair("fascist", 54),
@@ -2009,7 +2294,7 @@ TEST(Hoi4worldCountriesCountryConverter, IdeologySupportIsConverted)
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, IdeologySupportDefaultsToAllNeutrality)
+TEST(Hoi4worldCountriesCountryConverter, IdeologySupportDefaultsToAllNeutrality)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one({.number = 1, .capital_state = 2});
@@ -2035,17 +2320,19 @@ TEST(Hoi4worldCountriesCountryConverter, IdeologySupportDefaultsToAllNeutrality)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetIdeologySupport(), testing::UnorderedElementsAre(testing::Pair("neutrality", 100)));
+   EXPECT_THAT(country_one.value_or(Country({})).GetIdeologySupport(),
+       testing::UnorderedElementsAre(testing::Pair("neutrality", 100)));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, StabilityDefaultsToZero)
+TEST(Hoi4worldCountriesCountryConverter, StabilityDefaultsToZero)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one({.number = 1, .capital_state = 2});
@@ -2071,17 +2358,18 @@ TEST(Hoi4worldCountriesCountryConverter, StabilityDefaultsToZero)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetStability(), 0.0F);
+   EXPECT_THAT(country_one.value_or(Country({})).GetStability(), 0.0F);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, StabilityConvertsFromLegitimacy)
+TEST(Hoi4worldCountriesCountryConverter, StabilityConvertsFromLegitimacy)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::Country source_country_one({.number = 1, .capital_state = 2, .legitimacy = 100});
@@ -2108,6 +2396,7 @@ TEST(Hoi4worldCountriesCountryConverter, StabilityConvertsFromLegitimacy)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
@@ -2129,33 +2418,42 @@ TEST(Hoi4worldCountriesCountryConverter, StabilityConvertsFromLegitimacy)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_EQ(country_one->GetStability(), 0.60F);
-   EXPECT_FLOAT_EQ(country_two->GetStability(), 0.00F);
+   EXPECT_EQ(country_one.value_or(Country({})).GetStability(), 0.60F);
+   EXPECT_FLOAT_EQ(country_two.value_or(Country({})).GetStability(), 0.00F);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, UnitsAreConverted)
+TEST(Hoi4worldCountriesCountryConverter, UnitsAreConverted)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    vic3::Buildings buildings(std::map<int, std::vector<vic3::Building>>{
-       {1,
-           {vic3::Building(vic3::BuildingType::Barracks,
-               1,
-               0,
-               1,
-               std::vector<std::string>{"trench_infantry", "field_hospitals"})}},
-       {2,
-           {vic3::Building(vic3::BuildingType::Barracks,
-               2,
-               0,
-               1,
-               std::vector<std::string>{"trench_infantry", "wound_dressing", "militia"})}},
+       {
+           1,
+           {
+               vic3::Building(vic3::kBuildingTypeBarracks,
+                   1,
+                   vic3::GoodsSalesValue{0},
+                   vic3::StaffingLevel{1},
+                   std::vector<std::string>{"trench_infantry", "field_hospitals"}),
+           },
+       },
+       {
+           2,
+           {
+               vic3::Building(vic3::kBuildingTypeBarracks,
+                   2,
+                   vic3::GoodsSalesValue{0},
+                   vic3::StaffingLevel{1},
+                   std::vector<std::string>{"trench_infantry", "wound_dressing", "militia"}),
+           },
+       },
    });
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.buildings = buildings});
    const vic3::Country source_country_one({.number = 1});
@@ -2215,13 +2513,14 @@ TEST(Hoi4worldCountriesCountryConverter, UnitsAreConverted)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetUnits(),
+   EXPECT_THAT(country_one.value_or(Country({})).GetUnits(),
        testing::UnorderedElementsAre(hoi4::Unit{"Light Infantry", 40, 1},
            hoi4::Unit{"Light Infantry", 40, 1},
            hoi4::Unit{"Light Infantry", 70, 2},
@@ -2229,7 +2528,7 @@ TEST(Hoi4worldCountriesCountryConverter, UnitsAreConverted)
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, WarsDefaultToEmpty)
+TEST(Hoi4worldCountriesCountryConverter, WarsDefaultToEmpty)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "T00"}});
@@ -2254,17 +2553,18 @@ TEST(Hoi4worldCountriesCountryConverter, WarsDefaultToEmpty)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_TRUE(country_one->GetWars().empty());
+   EXPECT_TRUE(country_one.value_or(Country({})).GetWars().empty());
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, WarsCanBeAdded)
+TEST(Hoi4worldCountriesCountryConverter, WarsCanBeAdded)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world = vic3::World(vic3::WorldOptions());
    const mappers::CountryMapper country_mapper({{1, "T00"}});
@@ -2273,7 +2573,7 @@ TEST(Hoi4worldCountriesCountryConverter, WarsCanBeAdded)
    std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
    mappers::TemplateMap templates;
 
-   auto country_one = ConvertCountry(source_world,
+   std::optional<Country> possible_country = ConvertCountry(source_world,
        source_country_one,
        commonItems::LocalizationDatabase{{}, {}},
        country_mapper,
@@ -2289,23 +2589,24 @@ TEST(Hoi4worldCountriesCountryConverter, WarsCanBeAdded)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
+   ASSERT_TRUE(possible_country.has_value());
+   Country country = possible_country.value_or(Country({}));
 
    const War war_one({.original_attacker = "ONE"});
-   country_one->AddWar(war_one);
+   country.AddWar(war_one);
    const War war_two({.original_attacker = "TWO"});
-   country_one->AddWar(war_two);
+   country.AddWar(war_two);
 
-
-   ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetWars(), testing::ElementsAre(war_one, war_two));
+   EXPECT_THAT(country.GetWars(), testing::ElementsAre(war_one, war_two));
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, MonarchIdeaCanBeAdded)
+TEST(Hoi4worldCountriesCountryConverter, MonarchIdeaCanBeAdded)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    const vic3::World source_world = vic3::World(vic3::WorldOptions{});
@@ -2340,17 +2641,18 @@ TEST(Hoi4worldCountriesCountryConverter, MonarchIdeaCanBeAdded)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetIdeas(), testing::ElementsAre("TAG_FirstName_LastName"));
-   EXPECT_THAT(country_one->GetMonarchIdeaIds(), 42);
+   EXPECT_THAT(country_one.value_or(Country({})).GetIdeas(), testing::ElementsAre("TAG_FirstName_LastName"));
+   EXPECT_THAT(country_one.value_or(Country({})).GetMonarchIdeaIds(), 42);
 }
 
-TEST(Hoi4worldCountriesCountryConverter, ConvoysConvert)
+TEST(Hoi4worldCountriesCountryConverter, ConvoysConvert)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "ABC"}});
    const vic3::Country source_country_one({.number = 1});
@@ -2363,9 +2665,24 @@ TEST(Hoi4worldCountriesCountryConverter, ConvoysConvert)
        {3, vic3::State({.id = 3})},
    };
    vic3::Buildings buildings(std::map<int, std::vector<vic3::Building>>{
-       {1, {vic3::Building(vic3::BuildingType::Port, 1, 0, 1, std::vector<std::string>{"dummy", "pm_port_1"})}},
-       {2, {vic3::Building(vic3::BuildingType::Port, 2, 0, 1, std::vector<std::string>{"pm_port_2"})}},
-       {3, {vic3::Building(vic3::BuildingType::Port, 3, 0, 1, std::vector<std::string>{"pm_port_3"})}},
+       {1,
+           {vic3::Building(vic3::kBuildingTypePort,
+               1,
+               vic3::GoodsSalesValue{0},
+               vic3::StaffingLevel{1},
+               std::vector<std::string>{"dummy", "pm_port_1"})}},
+       {2,
+           {vic3::Building(vic3::kBuildingTypePort,
+               2,
+               vic3::GoodsSalesValue{0},
+               vic3::StaffingLevel{1},
+               std::vector<std::string>{"pm_port_2"})}},
+       {3,
+           {vic3::Building(vic3::kBuildingTypePort,
+               3,
+               vic3::GoodsSalesValue{0},
+               vic3::StaffingLevel{1},
+               std::vector<std::string>{"pm_port_3"})}},
    });
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.states = vic3_states, .buildings = buildings});
    const States states({.states{
@@ -2407,6 +2724,7 @@ TEST(Hoi4worldCountriesCountryConverter, ConvoysConvert)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        convoy_distributor,
        {},
        dummy_characters,
@@ -2427,18 +2745,20 @@ TEST(Hoi4worldCountriesCountryConverter, ConvoysConvert)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        convoy_distributor,
        {},
        dummy_characters,
        dummy_culture_queues);
 
    ASSERT_TRUE(country_one.has_value());
-   EXPECT_THAT(country_one->GetConvoys(), 11);
+   EXPECT_THAT(country_one.value_or(Country({})).GetConvoys(), 11);
    ASSERT_TRUE(country_two.has_value());
-   EXPECT_THAT(country_two->GetConvoys(), 100);
+   EXPECT_THAT(country_two.value_or(Country({})).GetConvoys(), 100);
 }
 
-TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)
+
+TEST(Hoi4worldCountriesCountryConverter, OldNaviesConvert)  // NOLINT(cert-err58-cpp)
 {
    const mappers::CountryMapper country_mapper({{1, "TAG"}, {2, "ABC"}});
    const vic3::Country source_country_one({.number = 1});
@@ -2451,9 +2771,24 @@ TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)
        {3, vic3::State({.id = 3})},
    };
    vic3::Buildings buildings(std::map<int, std::vector<vic3::Building>>{
-       {1, {vic3::Building(vic3::BuildingType::NavalBase, 1, 0, 10, std::vector<std::string>{"pm_victorian"})}},
-       {2, {vic3::Building(vic3::BuildingType::NavalBase, 2, 0, 10, std::vector<std::string>{"pm_ancient"})}},
-       {3, {vic3::Building(vic3::BuildingType::NavalBase, 3, 0, 10, std::vector<std::string>{"pm_modern"})}},
+       {1,
+           {vic3::Building(vic3::kBuildingTypeNavalBase,
+               1,
+               vic3::GoodsSalesValue{0},
+               vic3::StaffingLevel{10},
+               std::vector<std::string>{"pm_victorian"})}},
+       {2,
+           {vic3::Building(vic3::kBuildingTypeNavalBase,
+               2,
+               vic3::GoodsSalesValue{0},
+               vic3::StaffingLevel{10},
+               std::vector<std::string>{"pm_ancient"})}},
+       {3,
+           {vic3::Building(vic3::kBuildingTypeNavalBase,
+               3,
+               vic3::GoodsSalesValue{0},
+               vic3::StaffingLevel{10},
+               std::vector<std::string>{"pm_modern"})}},
    });
    const vic3::World source_world = vic3::World(vic3::WorldOptions{.states = vic3_states, .buildings = buildings});
    const States states({.states{
@@ -2481,16 +2816,34 @@ TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)
    mappers::TemplateMap templates;
 
    std::vector<EquipmentVariant> legacy_ships{
-       EquipmentVariant("Basic Ship", "legacy_basic_ship", {}, {}, {}),
-       EquipmentVariant("1936 Ship", "legacy_1936_ship", {}, {}, {}),
+       EquipmentVariant(EquipmentVariantName{"Basic Ship"}, EquipmentVariantType{"legacy_basic_ship"}, {}, {}, {}),
+       EquipmentVariant(EquipmentVariantName{"1936 Ship"}, EquipmentVariantType{"legacy_1936_ship"}, {}, {}, {}),
    };
    std::vector<EquipmentVariant> mtg_ships{
-       EquipmentVariant("Basic Ship", "mtg_basic_ship", {}, {}, {}),
-       EquipmentVariant("1936 Ship", "mtg_1936_ship", {}, {}, {}),
+       EquipmentVariant(EquipmentVariantName{"Basic Ship"}, EquipmentVariantType{"mtg_basic_ship"}, {}, {}, {}),
+       EquipmentVariant(EquipmentVariantName{"1936 Ship"}, EquipmentVariantType{"mtg_1936_ship"}, {}, {}, {}),
    };
    std::vector<TaskForceTemplate> task_force_templates{
-       {{{"pm_victorian", 5.0F}}, {Ship("Cruiser", "basic_ship", "mtg_basic_ship", "legacy_basic_ship", "Basic Ship")}},
-       {{{"pm_modern", 10.0F}}, {Ship("Battleship", "1936_ship", "mtg_1936_ship", "legacy_1936_ship", "1936 Ship")}},
+       {
+           {{"pm_victorian", 5.0F}},
+           {Ship{
+               .name = "Cruiser",
+               .definition = "basic_ship",
+               .equipment = "mtg_basic_ship",
+               .legacy_equipment = "legacy_basic_ship",
+               .version = "Basic Ship",
+           }},
+       },
+       {
+           {{"pm_modern", 10.0F}},
+           {Ship{
+               .name = "Battleship",
+               .definition = "1936_ship",
+               .equipment = "mtg_1936_ship",
+               .legacy_equipment = "legacy_1936_ship",
+               .version = "1936 Ship",
+           }},
+       },
    };
 
    const auto country_one = ConvertCountry(source_world,
@@ -2509,6 +2862,7 @@ TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        task_force_templates,
        dummy_characters,
@@ -2529,6 +2883,7 @@ TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        task_force_templates,
        dummy_characters,
@@ -2539,8 +2894,8 @@ TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)
            .name = "1. Fleet",
            .ships =
                {
-                   Ship("Cruiser 1", "basic_ship", "mtg_basic_ship", "legacy_basic_ship", "Basic Ship"),
-                   Ship("Cruiser 2", "basic_ship", "mtg_basic_ship", "legacy_basic_ship", "Basic Ship"),
+                   Ship{"Cruiser 1", "basic_ship", "mtg_basic_ship", "legacy_basic_ship", "Basic Ship"},
+                   Ship{"Cruiser 2", "basic_ship", "mtg_basic_ship", "legacy_basic_ship", "Basic Ship"},
                },
            .location = 1,
        }));
@@ -2549,10 +2904,97 @@ TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)
            .name = "1. Fleet",
            .ships =
                {
-                   Ship("Battleship 1", "1936_ship", "mtg_1936_ship", "legacy_1936_ship", "1936 Ship"),
+                   Ship{"Battleship 1", "1936_ship", "mtg_1936_ship", "legacy_1936_ship", "1936 Ship"},
                },
            .location = 3,
        }));
+}
+
+
+TEST(Hoi4worldCountriesCountryConverter, NaviesConvert)  // NOLINT(cert-err58-cpp)
+{
+   const mappers::CountryMapper country_mapper({{1, "TAG"}});
+   const vic3::Country source_country_one({
+       .number = 1,
+       .navy_formations =
+           {
+               {1, vic3::MilitaryFormation{.name = "1. Fleet", .ships = {"ship_type_one", "ship_type_one"}}},
+               {2, vic3::MilitaryFormation{.name = "2. Fleet", .ships = {"ship_type_two"}}},
+           },
+   });
+   std::map<int, Character> dummy_characters;
+   std::map<std::string, mappers::CultureQueue> dummy_culture_queues;
+   const std::map<int, vic3::State> vic3_states{{1, vic3::State({.id = 1})}};
+   const vic3::Buildings buildings(std::map<int, std::vector<vic3::Building>>{{
+       1,
+       {
+           vic3::Building(vic3::kBuildingTypeNavalBase,
+               1,
+               vic3::GoodsSalesValue{0},
+               vic3::StaffingLevel{10},
+               std::vector<std::string>{"pm_victorian"}),
+       },
+   }});
+   const vic3::World source_world = vic3::World(vic3::WorldOptions{.states = vic3_states, .buildings = buildings});
+   const States states({
+       .states{
+           State(1,
+               {
+                   .owner = "TAG",
+                   .provinces = {1},
+                   .naval_base_location = 1,
+               }),
+       },
+       .vic3_state_ids_to_hoi4_state_ids{{1, 1}},
+       .hoi4_state_ids_to_owner{{1, "TAG"}},
+   });
+   mappers::TemplateMap templates;
+
+   const auto country_one = ConvertCountry(source_world,
+       source_country_one,
+       commonItems::LocalizationDatabase{{}, {}},
+       country_mapper,
+       states,
+       mappers::IdeologyMapper({}, {}),
+       mappers::UnitMapper(templates),
+       {},
+       {},
+       {},
+       {},
+       {},
+       {},
+       mappers::CultureGraphicsMapper{{}},
+       mappers::LeaderTypeMapper({}),
+       mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({
+           {"ship_type_one", Ship{.name = "One Ship"}},
+           {"ship_type_two", Ship{.name = "Two Ship"}},
+       }),
+       {0, {}},
+       {},
+       dummy_characters,
+       dummy_culture_queues);
+
+
+   EXPECT_THAT(country_one.value_or(Country({})).GetTaskForces(),
+       testing::ElementsAre(
+           TaskForce{
+               .name = "1. Fleet",
+               .ships =
+                   {
+                       Ship{.name = "One Ship 1"},
+                       Ship{.name = "One Ship 2"},
+                   },
+               .location = 1,
+           },
+           TaskForce{
+               .name = "2. Fleet",
+               .ships =
+                   {
+                       Ship{.name = "Two Ship 1"},
+                   },
+               .location = 1,
+           }));
 }
 
 

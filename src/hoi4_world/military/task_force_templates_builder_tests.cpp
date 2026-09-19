@@ -11,14 +11,14 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldMilitaryTaskForceTemplatesBuilderTests, IgnoresBadTaskForceTemplates)
+TEST(Hoi4worldMilitaryTaskForceTemplatesBuilderTests, IgnoresBadTaskForceTemplates)  // NOLINT(cert-err58-cpp)
 {
    const std::vector<TaskForceTemplate> task_forces =
        ImportTaskForceTemplates("test_files/hoi4_world/military/IgnoresBadTaskForceTemplates.txt");
    EXPECT_TRUE(task_forces.empty());
 }
 
-TEST(Hoi4worldMilitaryTaskForceTemplatesBuilderTests, ImportsTaskForceTemplates)
+TEST(Hoi4worldMilitaryTaskForceTemplatesBuilderTests, ImportsTaskForceTemplates)  // NOLINT(cert-err58-cpp)
 {
    const std::vector<TaskForceTemplate> task_forces =
        ImportTaskForceTemplates("test_files/hoi4_world/military/ImportsTaskForceTemplates.txt");
@@ -29,22 +29,22 @@ TEST(Hoi4worldMilitaryTaskForceTemplatesBuilderTests, ImportsTaskForceTemplates)
        {"pm_basic_smallship", 50.0F},
        {"pm_1936_bigship", 21.0F},
        {"pm_1936_smallship", 11.0F}};
-   std::map<std::string, int> nameCounts;
+   std::map<std::string, int> name_counts;
    for (const auto& tmpl: task_forces)
    {
-      tmpl.AddShipsIfPossible(ships, nameCounts, naval_pms);
+      tmpl.AddShipsIfPossible(ships, name_counts, naval_pms);
    }
 
    EXPECT_THAT(ships,
-       testing::ElementsAre(Ship("Big Ship 1", "test1", "test1", "legacy_test1", "Basic Big Ship"),
-           Ship("Small Ship 1", "test1", "test1", "legacy_test1", "Basic Small Ship"),
-           Ship("Small Ship 2", "test1", "test1", "legacy_test1", "Basic Small Ship"),
-           Ship("Big Ship 2", "test1", "test1", "legacy_test1", "Basic Big Ship"),
-           Ship("Small Ship 3", "test1", "test1", "legacy_test1", "Basic Small Ship"),
-           Ship("Small Ship 4", "test1", "test1", "legacy_test1", "Basic Small Ship"),
-           Ship("Big Ship 3", "test2", "test2", "legacy_test2", "1936 Big Ship"),
-           Ship("Small Ship 5", "test2", "test2", "legacy_test2", "1936 Small Ship"),
-           Ship("Small Ship 6", "test2", "test2", "legacy_test2", "1936 Small Ship")));
+       testing::ElementsAre(Ship{"Big Ship 1", "test1", "test1", "legacy_test1", "Basic Big Ship"},
+           Ship{"Small Ship 1", "test1", "test1", "legacy_test1", "Basic Small Ship"},
+           Ship{"Small Ship 2", "test1", "test1", "legacy_test1", "Basic Small Ship"},
+           Ship{"Big Ship 2", "test1", "test1", "legacy_test1", "Basic Big Ship"},
+           Ship{"Small Ship 3", "test1", "test1", "legacy_test1", "Basic Small Ship"},
+           Ship{"Small Ship 4", "test1", "test1", "legacy_test1", "Basic Small Ship"},
+           Ship{"Big Ship 3", "test2", "test2", "legacy_test2", "1936 Big Ship"},
+           Ship{"Small Ship 5", "test2", "test2", "legacy_test2", "1936 Small Ship"},
+           Ship{"Small Ship 6", "test2", "test2", "legacy_test2", "1936 Small Ship"}));
    EXPECT_THAT(naval_pms,
        testing::ContainerEq(std::map<std::string, float>{{"pm_basic_bigship", 5.0F},
            {"pm_basic_smallship", 30.0F},

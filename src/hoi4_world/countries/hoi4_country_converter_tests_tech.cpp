@@ -13,11 +13,11 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldCountriesCountryConverter, DecentralizedCountriesHaveTwoResearchSlots)
+TEST(Hoi4worldCountriesCountryConverter, DecentralizedCountriesHaveTwoResearchSlots)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world(
        {.country_rankings = vic3::CountryRankings(std::set{4}, std::set{3, 2}, {{2, 10}, {3, 10}, {4, 10}})});
-   const vic3::Country c1({.number = 1, .country_type = "decentralized"});
+   const vic3::Country source_country({.number = 1, .country_type = "decentralized"});
 
    const mappers::CountryMapper country_mapper({{1, "TAG"}});
    std::map<int, Character> dummy_characters;
@@ -25,7 +25,7 @@ TEST(Hoi4worldCountriesCountryConverter, DecentralizedCountriesHaveTwoResearchSl
    mappers::TemplateMap templates;
 
    const auto country_one = ConvertCountry(source_world,
-       c1,
+       source_country,
        commonItems::LocalizationDatabase{{}, {}},
        country_mapper,
        {},
@@ -40,20 +40,21 @@ TEST(Hoi4worldCountriesCountryConverter, DecentralizedCountriesHaveTwoResearchSl
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
-   EXPECT_EQ(country_one.value().GetStartingResearchSlots(), 2);
+   EXPECT_EQ(country_one.value_or(Country({})).GetStartingResearchSlots(), 2);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, CountriesHaveThreeResearchSlotsByDefault)
+TEST(Hoi4worldCountriesCountryConverter, CountriesHaveThreeResearchSlotsByDefault)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world(
        {.country_rankings = vic3::CountryRankings(std::set{4}, std::set{3, 2}, {{2, 10}, {3, 10}, {4, 10}})});
-   const vic3::Country c2({.number = 2, .country_type = "colonial"});
+   const vic3::Country source_country({.number = 2, .country_type = "colonial"});
 
    const mappers::CountryMapper country_mapper({{2, "Z02"}});
    std::map<int, Character> dummy_characters;
@@ -61,7 +62,7 @@ TEST(Hoi4worldCountriesCountryConverter, CountriesHaveThreeResearchSlotsByDefaul
    mappers::TemplateMap templates;
 
    const auto country_two = ConvertCountry(source_world,
-       c2,
+       source_country,
        commonItems::LocalizationDatabase{{}, {}},
        country_mapper,
        {},
@@ -76,20 +77,21 @@ TEST(Hoi4worldCountriesCountryConverter, CountriesHaveThreeResearchSlotsByDefaul
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
-   EXPECT_EQ(country_two.value().GetStartingResearchSlots(), 3);
+   EXPECT_EQ(country_two.value_or(Country({})).GetStartingResearchSlots(), 3);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, UnrecognizedCountriesHaveTwoResearchSlots)
+TEST(Hoi4worldCountriesCountryConverter, UnrecognizedCountriesHaveTwoResearchSlots)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world(
        {.country_rankings = vic3::CountryRankings(std::set{4}, std::set{3, 2}, {{2, 10}, {3, 10}, {4, 10}})});
-   const vic3::Country c3({.number = 3, .country_type = "unrecognized"});
+   const vic3::Country source_country({.number = 3, .country_type = "unrecognized"});
 
    const mappers::CountryMapper country_mapper({{3, "Z03"}});
    std::map<int, Character> dummy_characters;
@@ -97,7 +99,7 @@ TEST(Hoi4worldCountriesCountryConverter, UnrecognizedCountriesHaveTwoResearchSlo
    mappers::TemplateMap templates;
 
    const auto country_three = ConvertCountry(source_world,
-       c3,
+       source_country,
        commonItems::LocalizationDatabase{{}, {}},
        country_mapper,
        {},
@@ -112,20 +114,21 @@ TEST(Hoi4worldCountriesCountryConverter, UnrecognizedCountriesHaveTwoResearchSlo
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
-   EXPECT_EQ(country_three.value().GetStartingResearchSlots(), 2);
+   EXPECT_EQ(country_three.value_or(Country({})).GetStartingResearchSlots(), 2);
 }
 
 
-TEST(Hoi4worldCountriesCountryConverter, GreatPowersHaveFourResearchSlots)
+TEST(Hoi4worldCountriesCountryConverter, GreatPowersHaveFourResearchSlots)  // NOLINT(cert-err58-cpp)
 {
    const vic3::World source_world(
        {.country_rankings = vic3::CountryRankings(std::set{4}, std::set{3, 2}, {{2, 10}, {3, 10}, {4, 10}})});
-   const vic3::Country c4({.number = 4, .country_type = "recognized"});
+   const vic3::Country source_country({.number = 4, .country_type = "recognized"});
 
    const mappers::CountryMapper country_mapper({{4, "Z04"}});
    std::map<int, Character> dummy_characters;
@@ -133,7 +136,7 @@ TEST(Hoi4worldCountriesCountryConverter, GreatPowersHaveFourResearchSlots)
    mappers::TemplateMap templates;
 
    const auto country_four = ConvertCountry(source_world,
-       c4,
+       source_country,
        commonItems::LocalizationDatabase{{}, {}},
        country_mapper,
        {},
@@ -148,12 +151,13 @@ TEST(Hoi4worldCountriesCountryConverter, GreatPowersHaveFourResearchSlots)
        mappers::CultureGraphicsMapper{{}},
        mappers::LeaderTypeMapper({}),
        mappers::CharacterTraitMapper({}, {}, {}, {}),
+       ShipConverter({}),
        {0, {}},
        {},
        dummy_characters,
        dummy_culture_queues);
 
-   EXPECT_EQ(country_four.value().GetStartingResearchSlots(), 4);
+   EXPECT_EQ(country_four.value_or(Country({})).GetStartingResearchSlots(), 4);
 }
 
 }  // namespace hoi4

@@ -11,6 +11,10 @@
 
 namespace hoi4
 {
+
+constexpr int kDefaultAdvisorCost = 150;
+
+
 struct Admiral
 {
    std::set<std::string> traits;
@@ -21,6 +25,8 @@ struct Admiral
 
    std::partial_ordering operator<=>(const Admiral&) const = default;
 };
+
+
 struct General
 {
    std::set<std::string> traits;
@@ -32,6 +38,8 @@ struct General
 
    std::partial_ordering operator<=>(const General&) const = default;
 };
+
+
 struct Leader
 {
    std::string sub_ideology;
@@ -39,15 +47,19 @@ struct Leader
 
    std::partial_ordering operator<=>(const Leader&) const = default;
 };
+
+
 struct Advisor
 {
    std::set<std::string> traits;
    std::string slot;
    std::string ledger;
-   int cost = 150;
+   int cost = kDefaultAdvisorCost;
 
    std::partial_ordering operator<=>(const Advisor&) const = default;
 };
+
+
 struct Spy
 {
    std::set<std::string> traits;
@@ -100,9 +112,6 @@ class Character
 
    void SetPortraitAlias(const std::string& alias) { portrait_alias_ = alias; }
 
-   [[nodiscard]] static int GetGenId() { return gen_id_; }
-   static void IncrementGenId() { ++gen_id_; }
-
    std::partial_ordering operator<=>(const Character&) const = default;
 
   private:
@@ -117,8 +126,6 @@ class Character
    std::optional<Leader> leader_data_;
    std::optional<Advisor> advisor_data_;
    std::optional<Spy> spy_data_;
-
-   inline static int gen_id_ = 1000;  // For generating new characters, like councils
 };
 }  // namespace hoi4
 

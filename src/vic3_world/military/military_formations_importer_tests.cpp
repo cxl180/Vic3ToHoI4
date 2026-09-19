@@ -11,20 +11,20 @@
 namespace vic3
 {
 
-TEST(Vic3worldMilitaryMilitaryFormationsImporter, EmptyInputMeansNoFormations)
+TEST(Vic3worldMilitaryMilitaryFormationsImporter, EmptyInputMeansNoFormations)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
    input << "\tdatabase={\n";
    input << "\t}\n";
    input << "}\n";
-   const std::map<int, MilitaryFormation> military_formations = ImportMilitaryFormations(input);
+   const std::map<int64_t, MilitaryFormation> military_formations = ImportMilitaryFormations(input);
 
    EXPECT_TRUE(military_formations.empty());
 }
 
 
-TEST(Vic3worldMilitaryMilitaryFormationsImporter, ExtrasAreSkipped)
+TEST(Vic3worldMilitaryMilitaryFormationsImporter, ExtrasAreSkipped)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -42,7 +42,7 @@ TEST(Vic3worldMilitaryMilitaryFormationsImporter, ExtrasAreSkipped)
    std::streambuf* cout_buffer = std::cout.rdbuf();
    std::cout.rdbuf(log.rdbuf());
 
-   [[maybe_unused]] const std::map<int, MilitaryFormation> military_formations = ImportMilitaryFormations(input);
+   [[maybe_unused]] const std::map<int64_t, MilitaryFormation> military_formations = ImportMilitaryFormations(input);
 
    std::cout.rdbuf(cout_buffer);
 
@@ -50,13 +50,13 @@ TEST(Vic3worldMilitaryMilitaryFormationsImporter, ExtrasAreSkipped)
 }
 
 
-TEST(Vic3worldMilitaryMilitaryFormationsImporter, FormationsCanBeInput)
+TEST(Vic3worldMilitaryMilitaryFormationsImporter, FormationsCanBeInput)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
    input << "\tdatabase={\n";
    input << "1234={\n";
-   input << "  country=12345\n";
+   input << "  country=3019898882\n";
    input << "  type=army\n";
    input << "  name=\"Formation Name\"\n";
    input << "  ordinal_number=2\n";
@@ -90,12 +90,12 @@ TEST(Vic3worldMilitaryMilitaryFormationsImporter, FormationsCanBeInput)
    input << "}\n";
    input << "\t}\n";
    input << "}\n";
-   const std::map<int, MilitaryFormation> military_formations = ImportMilitaryFormations(input);
+   const std::map<int64_t, MilitaryFormation> military_formations = ImportMilitaryFormations(input);
 
    EXPECT_THAT(military_formations,
        testing::UnorderedElementsAre(testing::Pair(1234,
                                          MilitaryFormation{
-                                             .country = 12345,
+                                             .country = -1275068414,
                                              .type = MilitaryFormationType::kArmy,
                                              .name = "Formation Name",
                                              .ordinal_number = 2,

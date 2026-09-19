@@ -19,11 +19,17 @@ Role::Role(const Role& rhs)
    decisions_categories_ = rhs.decisions_categories_;
    decisions_in_categories_ = rhs.decisions_in_categories_;
    events_ = rhs.events_;
+   scripted_effects_ = rhs.scripted_effects_;
 }
 
 
 Role& Role::operator=(const Role& other)
 {
+   if (this == &other)
+   {
+      return *this;
+   }
+
    name_ = other.name_;
    category_ = other.category_;
    trigger_ = other.trigger_->Copy();
@@ -36,6 +42,7 @@ Role& Role::operator=(const Role& other)
    decisions_categories_ = other.decisions_categories_;
    decisions_in_categories_ = other.decisions_in_categories_;
    events_ = other.events_;
+   scripted_effects_ = other.scripted_effects_;
 
    return *this;
 }
@@ -102,6 +109,10 @@ std::partial_ordering Role::operator<=>(const Role& other) const
    if (events_ != other.events_)
    {
       return events_ <=> other.events_;
+   }
+   if (scripted_effects_ != other.scripted_effects_)
+   {
+      return scripted_effects_ <=> other.scripted_effects_;
    }
 
    return std::strong_ordering::equal;
@@ -173,13 +184,18 @@ void PrintTo(const Role& role, std::ostream* os)
       }
       *os << "}\n";
    }
-   std::map<std::string, std::vector<Decision>> decisions_in_categories_;
    *os << "}\n";
    *os << "events {\n";
    for (const Event& event: role.events_)
    {
       PrintTo(event, os);
    }
+   *os << "scripted_effects {\n";
+   for (std::string_view scripted_effect: role.scripted_effects_)
+   {
+      *os << scripted_effect << "\n";
+   }
+   *os << "}\n";
    *os << "}\n";
 }
 

@@ -10,6 +10,7 @@
 #include "src/hoi4_world/decisions/decisions_category.h"
 #include "src/hoi4_world/events/event.h"
 #include "src/hoi4_world/focus_trees/focus.h"
+#include "src/hoi4_world/roles/alias_definition.h"
 #include "src/hoi4_world/roles/repeat_focus.h"
 #include "src/hoi4_world/roles/triggers/always_trigger.h"
 #include "src/hoi4_world/roles/triggers/trigger_base.h"
@@ -26,6 +27,7 @@ struct RoleOptions
    std::unique_ptr<Trigger> trigger = std::make_unique<AlwaysTrigger>(false);
    float score;
    std::vector<std::string> blockers;
+   std::vector<AliasDefinition> alias_definitions;
    std::vector<std::string> shared_focuses;
    std::vector<Focus> focuses;
    std::vector<RepeatFocus> repeat_focuses;
@@ -33,6 +35,7 @@ struct RoleOptions
    std::vector<DecisionsCategory> decisions_categories;
    std::map<std::string, std::vector<Decision>> decisions_in_categories;
    std::vector<Event> events;
+   std::vector<std::string> scripted_effects;
 };
 
 
@@ -45,6 +48,7 @@ class Role
        category_(std::move(options.category)),
        trigger_(std::move(options.trigger)),
        score_(options.score),
+       alias_definitions_(options.alias_definitions),
        blockers_(std::move(options.blockers)),
        shared_focuses_(std::move(options.shared_focuses)),
        focuses_(std::move(options.focuses)),
@@ -52,19 +56,22 @@ class Role
        removed_focuses_(std::move(options.removed_focuses)),
        decisions_categories_(std::move(options.decisions_categories)),
        decisions_in_categories_(std::move(options.decisions_in_categories)),
-       events_(std::move(options.events))
+       events_(std::move(options.events)),
+       scripted_effects_(std::move(options.scripted_effects))
    {
    }
    Role(const Role& rhs);
    Role& operator=(const Role& other);
-   Role(Role&&) = default;
+   Role(Role&&) noexcept = default;
    Role& operator=(Role&&) = default;
+   ~Role() = default;
 
    [[nodiscard]] const std::string& GetName() const { return name_; }
    [[nodiscard]] const std::string& GetCategory() const { return category_; }
    [[nodiscard]] const Trigger& GetTrigger() const { return *trigger_; }
    [[nodiscard]] float GetScore() const { return score_; }
    [[nodiscard]] const std::vector<std::string>& GetBlockers() const { return blockers_; }
+   [[nodiscard]] const std::vector<AliasDefinition>& GetAliasDefinitions() const { return alias_definitions_; }
    [[nodiscard]] const std::vector<std::string>& GetSharedFocuses() const { return shared_focuses_; }
    [[nodiscard]] const std::vector<Focus>& GetFocuses() const { return focuses_; }
    [[nodiscard]] const std::vector<RepeatFocus>& GetRepeatFocuses() const { return repeat_focuses_; }
@@ -75,6 +82,7 @@ class Role
       return decisions_in_categories_;
    }
    [[nodiscard]] const std::vector<Event>& GetEvents() const { return events_; }
+   [[nodiscard]] const std::vector<std::string>& GetScriptedEffects() const { return scripted_effects_; }
 
    std::partial_ordering operator<=>(const Role& other) const;
    bool operator==(const Role& other) const { return (*this <=> other) == std::partial_ordering::equivalent; }
@@ -88,6 +96,7 @@ class Role
    std::unique_ptr<Trigger> trigger_ = std::make_unique<AlwaysTrigger>(false);
    float score_;
    std::vector<std::string> blockers_;
+   std::vector<AliasDefinition> alias_definitions_;
    std::vector<std::string> shared_focuses_;
    std::vector<Focus> focuses_;
    std::vector<RepeatFocus> repeat_focuses_;
@@ -95,6 +104,7 @@ class Role
    std::vector<DecisionsCategory> decisions_categories_;
    std::map<std::string, std::vector<Decision>> decisions_in_categories_;
    std::vector<Event> events_;
+   std::vector<std::string> scripted_effects_;
 };
 
 }  // namespace hoi4

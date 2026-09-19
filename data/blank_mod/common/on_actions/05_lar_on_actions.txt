@@ -12,12 +12,16 @@ on_actions = {
 			# base values
             set_temp_variable = {
                 var = capture_chance
-                value = 90
+                value = 40
             }
             set_temp_variable = {
                 var = kill_chance
-                value = 10
-            }			
+                value = 5
+            }
+            set_temp_variable = {
+                var = hiding_chance
+                value = 55
+            }
 
             # nullify kill chance for some missions
             if = {
@@ -31,33 +35,27 @@ on_actions = {
                     var = kill_chance
                     value = 0
                 }
+                # redistribute to hiding
+                add_to_temp_variable = {
+                    var = hiding_chance
+                    value = 5
+                }
             }
 
-            # Capture chance modifier unused as it would just increased or decrease death chance
-            #multiply_temp_variable = {
-            #   var = capture_chance
-            #   value = own_capture_chance_factor # the operative's capture chance modifiers
-            #}
-            #clamp_temp_variable = {
-            #   var = capture_chance
-            #   min = 0
-            #   max = 100
-            #}
-
             random_list = {
-                #log = yes # log picked effect in game.log
-
                 temp_var:capture_chance = {
                    	capture_operative = {
                    	    captured_by = ROOT
-                   	}  	
+                   	}
                 }
                 temp_var:kill_chance = {
                     kill_operative = {
                         killed_by = ROOT
                     }
                 }
-
+                temp_var:hiding_chance = {
+                    force_operative_leader_into_hiding = 28
+                }
             }
 
         }
@@ -225,70 +223,6 @@ on_actions = {
 		}
 	}
 
-	on_startup = {
-	}
-
-	# called a country fully decrypts cipher of a target country
-	# scope is the target country that its cipher is decrypted
-	# from scope is the decrypter country
-	on_fully_decrypted_cipher = {
-
-	}
-
-	# called when a country activates its active cipher bonuses against a target
-	# scope is the target country
-	# from scope is the country that activates its bonuses
-	on_activated_active_decryption_bonuses = {
-
-	}
-
-	#FROM is the one that joins the faction
-	on_create_faction = {
-	}
-
-	#FROM is faction leader on join faction requests. THIS DOES NOT FIRE ON ADD_TO_FACTION EFFECT! USE ON_OFFER_JOIN_FACTION!
-	on_join_faction = {
-	}
-
-	#FROM is country getting invited.
-	on_offer_join_faction = {
-	}
-
-	#ROOT = attacking side
-	#FROM = defending side
-	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
-	on_war_relation_added = { # ---> Fires in 2nd place (1st is on_declare_war) -> This one is triggered ALWAYS 
-	}
-
-	#FROM is war target
-	on_declare_war = {
-	}
-
-	#ROOT is winner #FROM gets annexed - This fires just before FROM gets annexed, meaning the country and everything it owns still exists. It will also fire on_annex and on_civil_war_end
-	on_civil_war_end_before_annexation = {
-	}
-
-	#ROOT is winner #FROM gets annexed - This will also fire on_annex
-	on_civil_war_end = {
-	}
-
-	# ROOT is capitulated country, FROM is winner
-	on_capitulation = {
-	}
-
-
-	#ROOT is winner #FROM gets annexed - This fires just before FROM gets annexed, meaning the country and everything it owns still exists. It will also fire on_annex and on_civil_war_end
-	on_civil_war_end_before_annexation = {
-	}
-
-	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
-	on_state_control_changed = {
-	}
-
-	#THIS is country that has just gotten into a war
-	on_war = {
-	}
-
 	on_weekly = {
 		effect = {
 			if = {
@@ -300,24 +234,4 @@ on_actions = {
 			}
 		}
 	}
-
-	#ROOT is winner #FROM gets annexed - For civil wars on_civil_war_end is also fired
-	on_annex = {
-	}
-	
-	# scope is operative
-	# from scope is the country 
-	#on_operative_recruited = {
-	#	effect = {
-	#	
-	#	}
-	#}
-	
-	# scope is operative
-	# from scope is the country 
-	#on_operative_created = {
-	#	effect = {
-	#	
-	#	}
-	#}
 }

@@ -11,13 +11,14 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldEventsEventImporterTests, ItemsAreDefaulted)
+TEST(Hoi4worldEventsEventImporterTests, ItemsAreDefaulted)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const Event event = EventImporter{}.ImportEvent("test_type", input);
 
    EXPECT_EQ(event.type, "test_type");
    EXPECT_TRUE(event.id.empty());
+   EXPECT_TRUE(event.event_namespace.empty());
    EXPECT_FALSE(event.title.has_value());
    EXPECT_TRUE(event.descriptions.empty());
    EXPECT_FALSE(event.picture.has_value());
@@ -32,11 +33,12 @@ TEST(Hoi4worldEventsEventImporterTests, ItemsAreDefaulted)
 }
 
 
-TEST(Hoi4worldEventsEventImporterTests, ItemsCanBeInput)
+TEST(Hoi4worldEventsEventImporterTests, ItemsCanBeInput)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "= {\n";
-   input << "\tid = test_id\n";
+   input << "\tid = test_id.123\n";
+   input << "\tnamespace = test_id\n";
    input << "\ttitle = event_title\n";
    input << "\tdesc = event_description_one\n";
    input << "\tdesc = event_description_two\n";
@@ -63,7 +65,8 @@ TEST(Hoi4worldEventsEventImporterTests, ItemsCanBeInput)
    input << "}";
    const Event event = EventImporter{}.ImportEvent("test_type", input);
 
-   EXPECT_EQ(event.id, "test_id");
+   EXPECT_EQ(event.id, "test_id.123");
+   EXPECT_EQ(event.event_namespace, "test_id");
    EXPECT_EQ(event.title, "event_title");
    EXPECT_THAT(event.descriptions, testing::ElementsAre("= event_description_one", "= event_description_two"));
    EXPECT_TRUE(event.picture.has_value());
@@ -91,7 +94,7 @@ TEST(Hoi4worldEventsEventImporterTests, ItemsCanBeInput)
 }
 
 
-TEST(Hoi4worldEventsEventImporterTests, BoolsCanBeSetToFalse)
+TEST(Hoi4worldEventsEventImporterTests, BoolsCanBeSetToFalse)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "= {\n";

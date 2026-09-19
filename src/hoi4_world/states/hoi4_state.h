@@ -16,6 +16,7 @@ namespace hoi4
 {
 
 using StateId = int;
+constexpr int kMaxAirbaseLevel = 10;
 
 
 struct StateOptions
@@ -25,6 +26,8 @@ struct StateOptions
    int manpower = 0;
    Resources resources;
    std::string category = "rural";
+   bool is_capital = false;
+   std::optional<std::string> continent;
 
    std::map<int, int> victory_points;
 
@@ -35,6 +38,7 @@ struct StateOptions
    std::optional<int> naval_base_level;
    int air_base_level = 0;
    std::set<std::string> cores;
+   std::set<std::string> homelands;
 
    float vic3_infrastructure = 0.0F;
    int infrastructure = 1;
@@ -51,6 +55,8 @@ class State
        manpower_(state_options.manpower),
        resources_(std::move(state_options.resources)),
        category_(std::move(state_options.category)),
+       is_capital_(state_options.is_capital),
+       continent_(std::move(state_options.continent)),
        victory_points_(std::move(state_options.victory_points)),
        civilian_factories_(state_options.civilian_factories),
        military_factories_(state_options.military_factories),
@@ -59,6 +65,7 @@ class State
        naval_base_level_(state_options.naval_base_level),
        air_base_level_(state_options.air_base_level),
        cores_(state_options.cores),
+       homelands_(state_options.homelands),
        vic3_infrastructure_(state_options.vic3_infrastructure),
        infrastructure_(state_options.infrastructure)
    {
@@ -70,6 +77,8 @@ class State
    [[nodiscard]] int GetManpower() const { return manpower_; }
    [[nodiscard]] const Resources& GetResources() const { return resources_; }
    [[nodiscard]] const std::string& GetCategory() const { return category_; }
+   [[nodiscard]] bool IsCapital() const { return is_capital_; }
+   [[nodiscard]] std::optional<std::string> GetContinent() const { return continent_; }
    [[nodiscard]] const std::map<int, int>& GetVictoryPoints() const { return victory_points_; }
    [[nodiscard]] int GetCivilianFactories() const { return civilian_factories_; }
    [[nodiscard]] int GetMilitaryFactories() const { return military_factories_; }
@@ -78,14 +87,19 @@ class State
    [[nodiscard]] std::optional<int> GetNavalBaseLevel() const { return naval_base_level_; }
    [[nodiscard]] int GetAirBaseLevel() const { return air_base_level_; }
    [[nodiscard]] std::set<std::string> GetCores() const { return cores_; }
+   [[nodiscard]] bool HasHomeland(const std::string& homeland) const { return homelands_.contains(homeland); }
+   [[nodiscard]] const std::set<std::string>& GetHomelands() const { return homelands_; }
    [[nodiscard]] float GetVic3Infrastructure() const { return vic3_infrastructure_; }
    [[nodiscard]] int GetInfrastructure() const { return infrastructure_; }
 
-   void IncreaseAirBaseLevel(int amount) { air_base_level_ = std::min(air_base_level_ + amount, 10); }
+   void SetIsCapital(bool value) { is_capital_ = value; }
+   void IncreaseAirBaseLevel(int amount) { air_base_level_ = std::min(air_base_level_ + amount, kMaxAirbaseLevel); }
 
    void SetHighestVictoryPointValue(int value);
 
-   std::partial_ordering operator<=>(const State&) const = default;
+   bool operator==(const State&) const = default;
+
+   friend void PrintTo(const State& state, std::ostream* os);
 
   private:
    StateId id_;
@@ -94,6 +108,8 @@ class State
    int manpower_ = 0;
    Resources resources_;
    std::string category_ = "rural";
+   bool is_capital_ = false;
+   std::optional<std::string> continent_;
 
    std::map<int, int> victory_points_;
 
@@ -104,6 +120,7 @@ class State
    std::optional<int> naval_base_level_;
    int air_base_level_ = 0;
    std::set<std::string> cores_;
+   std::set<std::string> homelands_;
 
    float vic3_infrastructure_ = 0.0F;
    int infrastructure_ = 1;

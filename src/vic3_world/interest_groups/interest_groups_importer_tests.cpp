@@ -9,7 +9,7 @@ namespace vic3
 {
 
 
-TEST(Vic3WorldInterestGroupsInterestGroupsImporter, NoInterestGroupsOnEmptyInput)
+TEST(Vic3WorldInterestGroupsInterestGroupsImporter, NoInterestGroupsOnEmptyInput)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const std::map<int, InterestGroup> igs = ImportInterestGroups(input);
@@ -18,7 +18,7 @@ TEST(Vic3WorldInterestGroupsInterestGroupsImporter, NoInterestGroupsOnEmptyInput
 }
 
 
-TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsCanBeImported)
+TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -42,12 +42,24 @@ TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsCanBeImported)
    const std::map<int, InterestGroup> igs = ImportInterestGroups(input);
 
    EXPECT_THAT(igs,
-       testing::UnorderedElementsAre(testing::Pair(0, InterestGroup("ig_example0", 2, 1, 0.25447F, true, {})),
-           testing::Pair(1, InterestGroup("ig_example1", 4, 3, 0.36117F, false, {}))));
+       testing::UnorderedElementsAre(testing::Pair(0,
+                                         InterestGroup("ig_example0",
+                                             InterestGroupCountryId{2},
+                                             InterestGroupLeader{1},
+                                             InterestGroupClout{0.25447F},
+                                             InterestGroupInGovernment{true},
+                                             {})),
+           testing::Pair(1,
+               InterestGroup("ig_example1",
+                   InterestGroupCountryId{4},
+                   InterestGroupLeader{3},
+                   InterestGroupClout{0.36117F},
+                   InterestGroupInGovernment{false},
+                   {}))));
 }
 
 
-TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsSetAsNoneAreSkipped)
+TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsSetAsNoneAreSkipped)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -61,7 +73,7 @@ TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsSetAsNoneAreSk
 }
 
 
-TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsImportsAreLogged)
+TEST(Vic3WorldInterestGroupsInterestGroupsImporter, InterestGroupsImportsAreLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";

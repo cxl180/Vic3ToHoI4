@@ -15,7 +15,7 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldRolesRequirementsNotTriggerTests, IsValidReturnsReturnTrueIfAllChildrenFalse)
+TEST(Hoi4worldRolesTriggersNotTriggerTests, IsValidReturnsReturnTrueIfAllChildrenFalse)  // NOLINT(cert-err58-cpp)
 {
    std::unique_ptr<Trigger> trigger_one = std::make_unique<AlwaysTrigger>(false);
    std::unique_ptr<Trigger> trigger_two = std::make_unique<AlwaysTrigger>(false);
@@ -27,12 +27,13 @@ TEST(Hoi4worldRolesRequirementsNotTriggerTests, IsValidReturnsReturnTrueIfAllChi
 
    const Country country({});
    const Scope scope = CountryScope{.country = country};
+   const Context context{.root = scope, .this_scope = scope, .prev = scope, .from = scope};
    const hoi4::World world({});
-   EXPECT_TRUE(not_trigger.IsValid(scope, world));
+   EXPECT_TRUE(not_trigger.IsValid(context, world));
 }
 
 
-TEST(Hoi4worldRolesRequirementsNotTriggerTests, IsValidReturnsFalseIfAnyChildrenTrue)
+TEST(Hoi4worldRolesTriggersNotTriggerTests, IsValidReturnsFalseIfAnyChildrenTrue)  // NOLINT(cert-err58-cpp)
 {
    std::unique_ptr<Trigger> trigger_one = std::make_unique<AlwaysTrigger>(true);
    std::unique_ptr<Trigger> trigger_two = std::make_unique<AlwaysTrigger>(false);
@@ -44,12 +45,32 @@ TEST(Hoi4worldRolesRequirementsNotTriggerTests, IsValidReturnsFalseIfAnyChildren
 
    const Country country({});
    const Scope scope = CountryScope{.country = country};
+   const Context context{.root = scope, .this_scope = scope, .prev = scope, .from = scope};
    const hoi4::World world({});
-   EXPECT_FALSE(not_trigger.IsValid(scope, world));
+   EXPECT_FALSE(not_trigger.IsValid(context, world));
 }
 
 
-TEST(Hoi4worldRolesRequirementsNotTriggerTests, EquivalentTriggersAreEqual)
+TEST(Hoi4worldRolesTriggersNotTriggerTests, FindAllValidReturnsEmptyVector)  // NOLINT(cert-err58-cpp)
+{
+   std::unique_ptr<Trigger> trigger_one = std::make_unique<AlwaysTrigger>(true);
+   std::unique_ptr<Trigger> trigger_two = std::make_unique<AlwaysTrigger>(false);
+
+   std::vector<std::unique_ptr<Trigger>> children;
+   children.push_back(std::move(trigger_one));
+   children.push_back(std::move(trigger_two));
+   const NotTrigger not_trigger(std::move(children));
+
+   const State state(1, {});
+   const Scope scope = StateScope{.state = state};
+   const Context context{.root = scope, .this_scope = scope, .prev = scope, .from = scope};
+   const hoi4::World world({});
+
+   EXPECT_TRUE(not_trigger.FindAllValid(context, world).empty());
+}
+
+
+TEST(Hoi4worldRolesTriggersNotTriggerTests, EquivalentTriggersAreEqual)  // NOLINT(cert-err58-cpp)
 {
    std::unique_ptr<Trigger> true_trigger_one = std::make_unique<AlwaysTrigger>(true);
    std::unique_ptr<Trigger> false_trigger_one = std::make_unique<AlwaysTrigger>(false);
@@ -86,7 +107,7 @@ TEST(Hoi4worldRolesRequirementsNotTriggerTests, EquivalentTriggersAreEqual)
 }
 
 
-TEST(Hoi4worldRolesRequirementsNotTriggerTests, CopyReturnsACopy)
+TEST(Hoi4worldRolesTriggersNotTriggerTests, CopyReturnsACopy)  // NOLINT(cert-err58-cpp)
 {
    std::unique_ptr<Trigger> true_trigger_one = std::make_unique<AlwaysTrigger>(true);
    std::unique_ptr<Trigger> false_trigger_one = std::make_unique<AlwaysTrigger>(false);

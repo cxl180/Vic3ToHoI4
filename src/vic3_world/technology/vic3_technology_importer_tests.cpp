@@ -10,7 +10,7 @@
 namespace vic3
 {
 
-TEST(Vic3WorldTechnologyVic3technologyimporterTests, AcquiredTechnologiesDefaultToEmpty)
+TEST(Vic3WorldTechnologyVic3technologyimporterTests, AcquiredTechnologiesDefaultToEmpty)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const std::map<int, std::set<std::string>> technologies = ImportAcquiredTechnologies(input);
@@ -19,13 +19,13 @@ TEST(Vic3WorldTechnologyVic3technologyimporterTests, AcquiredTechnologiesDefault
 }
 
 
-TEST(Vic3WorldTechnologyVic3technologyimporterTests, AcquiredTechnologiesCanBeImported)
+TEST(Vic3WorldTechnologyVic3technologyimporterTests, AcquiredTechnologiesCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
    input << "\tdatabase={\n";
    input << "123456={\n";
-   input << "\tcountry=123456\n";
+   input << "\tcountry=3019898882\n";
    input << "\tacquired_technologies={ technology technology_two }\n";
    input << "}\n";
    input << "1={\n";
@@ -42,11 +42,11 @@ TEST(Vic3WorldTechnologyVic3technologyimporterTests, AcquiredTechnologiesCanBeIm
    EXPECT_THAT(technologies,
        testing::UnorderedElementsAre(testing::Pair(1, std::set<std::string>{"technology_three"}),
            testing::Pair(2, std::set<std::string>{}),
-           testing::Pair(123456, std::set<std::string>{"technology", "technology_two"})));
+           testing::Pair(-1275068414, std::set<std::string>{"technology", "technology_two"})));
 }
 
 
-TEST(Vic3WorldTechnologyVic3technologyimporterTests, NoneIsHandledGracefully)
+TEST(Vic3WorldTechnologyVic3technologyimporterTests, NoneIsHandledGracefully)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -69,7 +69,7 @@ TEST(Vic3WorldTechnologyVic3technologyimporterTests, NoneIsHandledGracefully)
 }
 
 
-TEST(Vic3WorldTechnologyVic3technologyimporterTests, MissingCountrySectionMeansNoEntry)
+TEST(Vic3WorldTechnologyVic3technologyimporterTests, MissingCountrySectionMeansNoEntry)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";

@@ -8,7 +8,7 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralsCanBeConverted)
+TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralsCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> dummy_queue;
    const auto character_trait_mapper = mappers::ImportCharacterTraitMapper("configurables/character_traits.txt");
@@ -29,10 +29,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralsCanBeConverted)
    const auto character = ConvertCharacter(source_character,
        0,
        {.admiral_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        character_trait_mapper,
@@ -41,7 +41,40 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralsCanBeConverted)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, GeneralsCanBeConverted)
+TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralsCanBeConvertedWithNewStyleRoles)  // NOLINT(cert-err58-cpp)
+{
+   std::map<std::string, mappers::CultureQueue> dummy_queue;
+   const auto character_trait_mapper = mappers::ImportCharacterTraitMapper("configurables/character_traits.txt");
+
+   const auto source_character = vic3::Character({
+       .id = 1,
+       .roles = {"character_role_admiral"},
+       .rank = 2,
+       .traits = {"bandit"},
+   });
+   const auto expected_data = std::optional<Admiral>({
+       .traits = {"naval_trait_0", "naval_trait_1"},
+       .attack = 2,
+       .defense = 2,
+       .maneuvering = 2,
+       .coordination = 2,
+   });
+   const auto character = ConvertCharacter(source_character,
+       0,
+       {.admiral_ids = {1}},
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
+       {},
+       {},
+       character_trait_mapper,
+       dummy_queue);
+   EXPECT_EQ(character, Character({.id = 1, .admiral_data = expected_data}));
+}
+
+
+TEST(Hoi4worldCharactersHoi4characterconverter, GeneralsCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> dummy_queue;
    const auto character_trait_mapper = mappers::ImportCharacterTraitMapper("configurables/character_traits.txt");
@@ -62,10 +95,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, GeneralsCanBeConverted)
    const auto character = ConvertCharacter(source_character,
        0,
        {.general_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        character_trait_mapper,
@@ -74,7 +107,40 @@ TEST(Hoi4worldCharactersHoi4characterconverter, GeneralsCanBeConverted)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, FieldMarshalsCanBeConverted)
+TEST(Hoi4worldCharactersHoi4characterconverter, GeneralsCanBeConvertedWithNewStyleRoles)  // NOLINT(cert-err58-cpp)
+{
+   std::map<std::string, mappers::CultureQueue> dummy_queue;
+   const auto character_trait_mapper = mappers::ImportCharacterTraitMapper("configurables/character_traits.txt");
+
+   const auto source_character = vic3::Character({
+       .id = 1,
+       .roles = {"character_role_general"},
+       .rank = 2,
+       .traits = {"charismatic"},
+   });
+   const auto expected_data = std::optional<General>({
+       .traits = {"land_trait_0", "land_trait_1"},
+       .attack = 2,
+       .defense = 2,
+       .planning = 2,
+       .logistics = 2,
+   });
+   const auto character = ConvertCharacter(source_character,
+       0,
+       {.general_ids = {1}},
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
+       {},
+       {},
+       character_trait_mapper,
+       dummy_queue);
+   EXPECT_EQ(character, Character({.id = 1, .general_data = expected_data}));
+}
+
+
+TEST(Hoi4worldCharactersHoi4characterconverter, FieldMarshalsCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> dummy_queue;
    const auto character_trait_mapper = mappers::ImportCharacterTraitMapper("configurables/character_traits.txt");
@@ -96,10 +162,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, FieldMarshalsCanBeConverted)
    const auto character = ConvertCharacter(source_character,
        0,
        {.field_marshal_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        character_trait_mapper,
@@ -108,7 +174,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, FieldMarshalsCanBeConverted)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorsCanBeConverted)
+TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorsCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> dummy_queue;
    const auto source_character = vic3::Character({
@@ -119,10 +185,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorsCanBeConverted)
    const auto character = ConvertCharacter(source_character,
        0,
        {.advisor_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -131,7 +197,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorsCanBeConverted)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeadersCanBeConverted)
+TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeadersCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> dummy_queue;
    const auto source_character = vic3::Character({
@@ -142,10 +208,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeadersCanBeConverted)
    const auto character = ConvertCharacter(source_character,
        1,
        {},
-       "",
-       "",
-       "",
-       "test_ideology",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{"test_ideology"},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -154,7 +220,31 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeadersCanBeConverted)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, SpiesCanBeConverted)
+// NOLINTNEXTLINE(cert-err58-cpp)
+TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeadersCanBeConvertedWithNewStyleRoles)
+{
+   std::map<std::string, mappers::CultureQueue> dummy_queue;
+   const auto source_character = vic3::Character({
+       .id = 1,
+       .roles = {"character_role_politician"},
+   });
+   const auto expected_data = std::optional<Leader>({.sub_ideology = "test_ideology"});
+   const auto character = ConvertCharacter(source_character,
+       1,
+       {},
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{"test_ideology"},
+       {},
+       {},
+       mappers::CharacterTraitMapper({}, {}, {}, {}),
+       dummy_queue);
+   EXPECT_EQ(character, Character({.id = 1, .leader_data = expected_data}));
+}
+
+
+TEST(Hoi4worldCharactersHoi4characterconverter, SpiesCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> dummy_queue;
    const auto character_trait_mapper = mappers::ImportCharacterTraitMapper("configurables/character_traits.txt");
@@ -172,10 +262,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, SpiesCanBeConverted)
    const auto character = ConvertCharacter(source_character,
        0,
        {.spy_ids = {1}},
-       "",
-       "TAG",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{"TAG"},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        mappers::CountryMapper({{2, "TWO"}}),
        character_trait_mapper,
@@ -184,7 +274,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, SpiesCanBeConverted)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, GenericCharacterDataCanBeConverted)
+TEST(Hoi4worldCharactersHoi4characterconverter, GenericCharacterDataCanBeConverted)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> dummy_queue;
    const auto source_character = vic3::Character({
@@ -196,10 +286,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, GenericCharacterDataCanBeConvert
    const auto character = ConvertCharacter(source_character,
        0,
        {},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -208,7 +298,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, GenericCharacterDataCanBeConvert
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralPortraitIsEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralPortraitIsEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -220,10 +310,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralPortraitIsEnqueued)
    ConvertCharacter(source_character,
        0,
        {.admiral_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -232,7 +322,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdmiralPortraitIsEnqueued)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, GeneralPortraitIsEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, GeneralPortraitIsEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -244,10 +334,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, GeneralPortraitIsEnqueued)
    ConvertCharacter(source_character,
        0,
        {.general_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -256,7 +346,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, GeneralPortraitIsEnqueued)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorIdeologyPortraitsAreEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorIdeologyPortraitsAreEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character_c = vic3::Character({
@@ -283,10 +373,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorIdeologyPortraitsAreEnque
    ConvertCharacter(source_character_c,
        0,
        {.advisor_ids = {1}},
-       "",
-       "",
-       "communism",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"communism"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -294,10 +384,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorIdeologyPortraitsAreEnque
    ConvertCharacter(source_character_d,
        0,
        {.advisor_ids = {2}},
-       "",
-       "",
-       "democratic",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"democratic"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -305,10 +395,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorIdeologyPortraitsAreEnque
    ConvertCharacter(source_character_f,
        0,
        {.advisor_ids = {3}},
-       "",
-       "",
-       "fascism",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"fascism"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -316,10 +406,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorIdeologyPortraitsAreEnque
    ConvertCharacter(source_character_n,
        0,
        {.advisor_ids = {4}},
-       "",
-       "",
-       "anything_else",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"anything_else"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -335,7 +425,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorIdeologyPortraitsAreEnque
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeaderIdeologyPortraitsAreEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeaderIdeologyPortraitsAreEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character_c = vic3::Character({
@@ -362,10 +452,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeaderIdeologyPortraitsAr
    ConvertCharacter(source_character_c,
        1,
        {},
-       "",
-       "",
-       "communism",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"communism"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -373,10 +463,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeaderIdeologyPortraitsAr
    ConvertCharacter(source_character_d,
        2,
        {},
-       "",
-       "",
-       "democratic",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"democratic"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -384,10 +474,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeaderIdeologyPortraitsAr
    ConvertCharacter(source_character_f,
        3,
        {},
-       "",
-       "",
-       "fascism",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"fascism"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -395,10 +485,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeaderIdeologyPortraitsAr
    ConvertCharacter(source_character_n,
        4,
        {},
-       "",
-       "",
-       "anything_else",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{"anything_else"},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -414,7 +504,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CountryLeaderIdeologyPortraitsAr
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, SpyPortraitIsEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, SpyPortraitIsEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -425,10 +515,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, SpyPortraitIsEnqueued)
    ConvertCharacter(source_character,
        0,
        {.spy_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -437,7 +527,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, SpyPortraitIsEnqueued)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, FemaleSpyPortraitsAreEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, FemaleSpyPortraitsAreEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -449,10 +539,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, FemaleSpyPortraitsAreEnqueued)
    ConvertCharacter(source_character,
        0,
        {.spy_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -461,7 +551,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, FemaleSpyPortraitsAreEnqueued)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, LeaderMilitaryEnqueuesMilitaryPortraits)
+TEST(Hoi4worldCharactersHoi4characterconverter, LeaderMilitaryEnqueuesMilitaryPortraits)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character_g = vic3::Character({
@@ -477,10 +567,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, LeaderMilitaryEnqueuesMilitaryPo
    ConvertCharacter(source_character_g,
        1,
        {.field_marshal_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -488,10 +578,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, LeaderMilitaryEnqueuesMilitaryPo
    ConvertCharacter(source_character_a,
        2,
        {.admiral_ids = {2}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -504,7 +594,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, LeaderMilitaryEnqueuesMilitaryPo
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorMilitaryEnqueuesMilitaryPortraits)
+TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorMilitaryEnqueuesMilitaryPortraits)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character_g = vic3::Character({
@@ -520,10 +610,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorMilitaryEnqueuesMilitaryP
    ConvertCharacter(source_character_g,
        0,
        {.general_ids = {1}, .advisor_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -531,10 +621,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorMilitaryEnqueuesMilitaryP
    ConvertCharacter(source_character_a,
        0,
        {.admiral_ids = {2}, .advisor_ids = {2}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -547,7 +637,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AdvisorMilitaryEnqueuesMilitaryP
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, MonarchMilitaryEnqueuesMonarchPortraits)
+TEST(Hoi4worldCharactersHoi4characterconverter, MonarchMilitaryEnqueuesMonarchPortraits)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -559,10 +649,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, MonarchMilitaryEnqueuesMonarchPo
    ConvertCharacter(source_character,
        1,
        {.field_marshal_ids = {1}},
-       "head_of_state",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{"head_of_state"},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {"law_monarchy"},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -571,7 +661,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, MonarchMilitaryEnqueuesMonarchPo
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, CouncilPortraitsAreEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, CouncilPortraitsAreEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character_g = vic3::Character({
@@ -583,10 +673,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CouncilPortraitsAreEnqueued)
    ConvertCharacter(source_character_g,
        1,
        {},
-       "council",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{"council"},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {""},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -595,7 +685,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, CouncilPortraitsAreEnqueued)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, MonarchPortraitsAreEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, MonarchPortraitsAreEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -606,10 +696,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, MonarchPortraitsAreEnqueued)
    ConvertCharacter(source_character,
        1,
        {},
-       "head_of_state",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{"head_of_state"},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {"law_monarchy"},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -618,7 +708,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, MonarchPortraitsAreEnqueued)
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, FemaleMonarchPortraitsAreEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, FemaleMonarchPortraitsAreEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -630,10 +720,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, FemaleMonarchPortraitsAreEnqueue
    ConvertCharacter(source_character,
        1,
        {},
-       "head_of_state",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{"head_of_state"},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {"law_monarchy"},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -642,7 +732,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, FemaleMonarchPortraitsAreEnqueue
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, AllMiscFemalePortraitsAreEnqueued)
+TEST(Hoi4worldCharactersHoi4characterconverter, AllMiscFemalePortraitsAreEnqueued)  // NOLINT(cert-err58-cpp)
 {
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto source_character = vic3::Character({
@@ -655,10 +745,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AllMiscFemalePortraitsAreEnqueue
    ConvertCharacter(source_character,
        0,
        {.general_ids = {1}},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -667,7 +757,7 @@ TEST(Hoi4worldCharactersHoi4characterconverter, AllMiscFemalePortraitsAreEnqueue
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, PoorlyDefinedCharactersAreLogged)
+TEST(Hoi4worldCharactersHoi4characterconverter, PoorlyDefinedCharactersAreLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
    std::streambuf* cout_buffer = std::cout.rdbuf();
@@ -682,10 +772,10 @@ TEST(Hoi4worldCharactersHoi4characterconverter, PoorlyDefinedCharactersAreLogged
    const auto character = ConvertCharacter(source_character,
        0,
        {},
-       "",
-       "",
-       "",
-       "",
+       ConvertCharacterLeaderType{""},
+       ConvertCharacterCharacterTagType{""},
+       ConvertCharacterCountryIdeologyType{""},
+       ConvertCharacterSubIdeologyType{""},
        {},
        {},
        mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -699,25 +789,25 @@ TEST(Hoi4worldCharactersHoi4characterconverter, PoorlyDefinedCharactersAreLogged
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, RoyalsAreMonarchs)
+TEST(Hoi4worldCharactersHoi4characterconverter, RoyalsAreMonarchs)  // NOLINT(cert-err58-cpp)
 {
    EXPECT_TRUE(HasMonarchs("head_of_state", {"law_monarchy"}));
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, PrimeMinistersArentMonarchs)
+TEST(Hoi4worldCharactersHoi4characterconverter, PrimeMinistersArentMonarchs)  // NOLINT(cert-err58-cpp)
 {
    EXPECT_FALSE(HasMonarchs("prime_minister", {"law_monarchy"}));
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, PresidentsArentMonarchs)
+TEST(Hoi4worldCharactersHoi4characterconverter, PresidentsArentMonarchs)  // NOLINT(cert-err58-cpp)
 {
    EXPECT_FALSE(HasMonarchs("head_of_state", {}));
 }
 
 
-TEST(Hoi4worldCharactersHoi4characterconverter, CouncilsArentMonarchs)
+TEST(Hoi4worldCharactersHoi4characterconverter, CouncilsArentMonarchs)  // NOLINT(cert-err58-cpp)
 {
    EXPECT_FALSE(HasMonarchs("council", {"law_monarchy"}));
 }

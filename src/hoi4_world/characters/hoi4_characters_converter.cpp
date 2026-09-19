@@ -10,21 +10,25 @@
 #include "src/hoi4_world/characters/hoi4_character_converter.h"
 
 
+
 namespace
 {
+
+constexpr int kInitialCharacterId = 1000;
 int PickUnusedId(const std::map<int, vic3::Character>& source_characters,
     const std::map<int, hoi4::Character>& characters)
 {
-   while (source_characters.find(hoi4::Character::GetGenId()) != source_characters.end() ||
-          characters.find(hoi4::Character::GetGenId()) != characters.end())
-   {
-      hoi4::Character::IncrementGenId();
-   }
-   const int unused_id = hoi4::Character::GetGenId();
-   hoi4::Character::IncrementGenId();
+   static int generated_id = kInitialCharacterId;  // For generating new characters, like councils
 
-   return unused_id;
+   while (source_characters.contains(generated_id) || characters.contains(generated_id))
+   {
+      ++generated_id;
+   }
+
+   return generated_id;
 }
+
+
 int FindPrimeMinister(const std::map<int, vic3::InterestGroup>& igs, const vic3::Country& source_country)
 {
    int prime_minister_id = source_country.GetHeadOfStateId();
@@ -37,18 +41,18 @@ int FindPrimeMinister(const std::map<int, vic3::InterestGroup>& igs, const vic3:
       {
          continue;
       }
-      const auto& ig = ig_itr->second;
+      const auto& interest_group = ig_itr->second;
 
-      if (!ig.IsInGovernment())
+      if (!interest_group.IsInGovernment())
       {
          continue;
       }
 
 
-      if (max_clout < ig.GetClout())
+      if (max_clout < interest_group.GetClout())
       {
-         max_clout = ig.GetClout();
-         prime_minister_id = ig.GetLeader();
+         max_clout = interest_group.GetClout();
+         prime_minister_id = interest_group.GetLeader();
       }
    }
    return prime_minister_id;
@@ -72,17 +76,17 @@ std::pair<int, hoi4::Character> ConvertCountryLeader(const std::map<int, vic3::I
           .first_name = "The",
           .last_name = "Council",
           .culture = *source_country.GetPrimaryCultures().begin(),
-          .roles = {"politician"},
+          .roles = {"character_role_politician"},
       });
 
       return {new_council.GetId(),
           hoi4::ConvertCharacter(new_council,
               new_council.GetId(),
               {},  // The council are not Field Marshals
-              leader_type,
-              tag,
-              country_ideology,
-              sub_ideology,
+              hoi4::ConvertCharacterLeaderType{leader_type},
+              hoi4::ConvertCharacterCharacterTagType{tag},
+              hoi4::ConvertCharacterCountryIdeologyType{country_ideology},
+              hoi4::ConvertCharacterSubIdeologyType{sub_ideology},
               source_country.GetActiveLaws(),
               {},  // country_mapper only needed for spies
               mappers::CharacterTraitMapper({}, {}, {}, {}),
@@ -110,10 +114,10 @@ std::pair<int, hoi4::Character> ConvertCountryLeader(const std::map<int, vic3::I
        hoi4::ConvertCharacter(source_character_itr->second,
            leader_id,
            {.field_marshal_ids = {leader_id}},  // Ruler generals are always Field Marshals
-           leader_type,
-           tag,
-           country_ideology,
-           sub_ideology,
+           hoi4::ConvertCharacterLeaderType{leader_type},
+           hoi4::ConvertCharacterCharacterTagType{tag},
+           hoi4::ConvertCharacterCountryIdeologyType{country_ideology},
+           hoi4::ConvertCharacterSubIdeologyType{sub_ideology},
            source_country.GetActiveLaws(),
            {},  // country_mapper only needed for spies
            character_trait_mapper,
@@ -131,7 +135,7 @@ std::pair<FieldMarshalIds, GeneralIds> PickGenerals(const std::map<int, vic3::Ch
    std::ranges::copy_if(source_character_ids, std::back_inserter(ids), [source_characters](const int id) {
       if (const auto& itr = source_characters.find(id); itr != source_characters.end())
       {
-         return itr->second.GetRoles().contains("general");
+         return itr->second.GetRoles().contains("character_role_general") || itr->second.GetRoles().contains("general");
       }
       return false;
    });
@@ -182,12 +186,12 @@ std::tuple<AdmiralIds, AdvisorIds, SpyIds> PickMiscCharacters(const std::map<int
       }
 
       const auto& roles = itr->second.GetRoles();
-      if (roles.contains("admiral"))
+      if (roles.contains("character_role_admiral") || roles.contains("admiral"))
       {
          admiral_ids.emplace(id);
          character_ids.emplace(id);
       }
-      if (roles.contains("politician") && id != leader_id)
+      if ((roles.contains("character_role_politician") || roles.contains("politician")) && id != leader_id)
       {
          advisor_ids.emplace(id);
          character_ids.emplace(id);
@@ -256,13 +260,13 @@ void ProcessCultureQueue(const mappers::CultureQueue& culture_queue,
     std::map<std::string, int>& portrait_counts,
     std::map<int, hoi4::Character>& characters)
 {
-   const auto ByPortraitCount = [portrait_counts](const std::string& lhs, const std::string& rhs) {
+   const auto by_portrait_count = [portrait_counts](const std::string& lhs, const std::string& rhs) {
       return portrait_counts.at(lhs) < portrait_counts.at(rhs);
    };
 
    for (auto& [key, portraits]: portrait_paths)
    {
-      std::ranges::sort(portraits, ByPortraitCount);
+      std::ranges::sort(portraits, by_portrait_count);
       const auto& queued_characters_itr = culture_queue.find(key);
       if (queued_characters_itr == culture_queue.end())
       {
@@ -335,10 +339,10 @@ hoi4::Characters hoi4::ConvertCharacters(const std::map<int, vic3::Character>& s
           ConvertCharacter(source_character_itr->second,
               leader_id,
               role_ids,
-              leader_type,
-              tag,
-              country_ideology,
-              sub_ideology,
+              hoi4::ConvertCharacterLeaderType{leader_type},
+              hoi4::ConvertCharacterCharacterTagType{tag},
+              hoi4::ConvertCharacterCountryIdeologyType{country_ideology},
+              hoi4::ConvertCharacterSubIdeologyType{sub_ideology},
               source_country.GetActiveLaws(),
               country_mapper,
               character_trait_mapper,
@@ -351,7 +355,7 @@ hoi4::Characters hoi4::ConvertCharacters(const std::map<int, vic3::Character>& s
       monarch_id = source_country.GetHeadOfStateId();
    }
 
-   return {character_ids, role_ids.spy_ids, monarch_id};
+   return {.character_ids = character_ids, .spy_ids = role_ids.spy_ids, .monarch_idea_id = monarch_id};
 }
 
 void hoi4::AssignPortraits(const std::map<std::string, mappers::CultureQueue>& culture_queues,
@@ -360,6 +364,8 @@ void hoi4::AssignPortraits(const std::map<std::string, mappers::CultureQueue>& c
     const int playthrough_id,
     std::map<int, Character>& characters)
 {
+   culture_graphics_mapper.CheckMappings(source_cultures);
+
    std::map<std::string, int> portrait_counts;
 
    for (const auto& [culture, culture_queue]: culture_queues)

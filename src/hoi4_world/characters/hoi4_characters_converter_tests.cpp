@@ -13,7 +13,7 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
+TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)  // NOLINT(cert-err58-cpp)
 {
    const auto country_mapper = mappers::CountryMapper({{3, "TWO"}});
 
@@ -50,12 +50,12 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
        .rank = 2,
        .traits = {"charismatic"},
    });
-   // Filler General
+   // General with new-style role
    const auto character_four = vic3::Character({
        .id = 4,
        .first_name = "Test",
        .last_name = "Mann",
-       .roles = {"general"},
+       .roles = {"character_role_general"},
        .rank = 2,
        .traits = {"charismatic"},
    });
@@ -78,9 +78,18 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
        .rank = 2,
        .traits = {"bandit"},
    });
-   // Spy
+   // Admiral with new-syle role
    const auto character_seven = vic3::Character({
        .id = 7,
+       .first_name = "Test",
+       .last_name = "Mann",
+       .roles = {"character_role_admiral"},
+       .rank = 2,
+       .traits = {"bandit"},
+   });
+   // Spy
+   const auto character_eight = vic3::Character({
+       .id = 8,
        .first_name = "Test",
        .last_name = "Mann",
        .roles = {"agitator"},
@@ -88,16 +97,24 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
        .origin_country_id = 3,
    });
    // Advisor
-   const auto character_eight = vic3::Character({
-       .id = 8,
+   const auto character_nine = vic3::Character({
+       .id = 9,
        .first_name = "Test",
        .last_name = "Mann",
        .roles = {"politician"},
        .traits = {"inspirational_orator"},
    });
+   // Advisor with new-style role
+   const auto character_ten = vic3::Character({
+       .id = 10,
+       .first_name = "Test",
+       .last_name = "Mann",
+       .roles = {"character_role_politician"},
+       .traits = {"inspirational_orator"},
+   });
    // General Advisor
-   const auto character_nine = vic3::Character({
-       .id = 9,
+   const auto character_eleven = vic3::Character({
+       .id = 11,
        .first_name = "Test",
        .last_name = "Mann",
        .roles = {"general", "politician"},
@@ -105,8 +122,8 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
        .traits = {"charismatic"},
    });
    // Admiral Advisor
-   const auto character_ten = vic3::Character({
-       .id = 10,
+   const auto character_twelve = vic3::Character({
+       .id = 12,
        .first_name = "Test",
        .last_name = "Mann",
        .roles = {"admiral", "politician"},
@@ -126,12 +143,14 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
        {8, character_eight},
        {9, character_nine},
        {10, character_ten},
+       {11, character_eleven},
+       {12, character_twelve},
    };
    ConvertCharacters(source_characters,
        "TAG",
        "",
        "sub_ideology",
-       vic3::Country({.head_of_state_id = 2, .character_ids = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}),
+       vic3::Country({.head_of_state_id = 2, .character_ids = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}}),
        {},
        leader_type_mapper,
        character_trait_mapper,
@@ -218,23 +237,35 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
        .id = 7,
        .first_name = "Test",
        .last_name = "Mann",
-       .spy_data = spy_data,
+       .admiral_data = admiral_data,
    });
    const auto expected_character_eight = Character({
        .id = 8,
        .first_name = "Test",
        .last_name = "Mann",
-       .advisor_data = advisor_data_1,
+       .spy_data = spy_data,
    });
    const auto expected_character_nine = Character({
        .id = 9,
        .first_name = "Test",
        .last_name = "Mann",
-       .general_data = general_data,
-       .advisor_data = advisor_data_2,
+       .advisor_data = advisor_data_1,
    });
    const auto expected_character_ten = Character({
        .id = 10,
+       .first_name = "Test",
+       .last_name = "Mann",
+       .advisor_data = advisor_data_1,
+   });
+   const auto expected_character_eleven = Character({
+       .id = 11,
+       .first_name = "Test",
+       .last_name = "Mann",
+       .general_data = general_data,
+       .advisor_data = advisor_data_2,
+   });
+   const auto expected_character_twelve = Character({
+       .id = 12,
        .first_name = "Test",
        .last_name = "Mann",
        .admiral_data = admiral_data,
@@ -251,11 +282,13 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CharactersAreConverted)
            testing::Pair(7, expected_character_seven),
            testing::Pair(8, expected_character_eight),
            testing::Pair(9, expected_character_nine),
-           testing::Pair(10, expected_character_ten)));
+           testing::Pair(10, expected_character_ten),
+           testing::Pair(11, expected_character_eleven),
+           testing::Pair(12, expected_character_twelve)));
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, PortraitsAreAssigned)
+TEST(Hoi4worldCharactersHoi4charactersconverter, PortraitsAreAssigned)  // NOLINT(cert-err58-cpp)
 {
    std::map<int, Character> characters;
    std::map<std::string, mappers::CultureQueue> culture_queues;
@@ -369,7 +402,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, PortraitsAreAssigned)
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, CouncilsAreCreated)
+TEST(Hoi4worldCharactersHoi4charactersconverter, CouncilsAreCreated)  // NOLINT(cert-err58-cpp)
 {
    std::map<int, Character> characters;
    std::map<std::string, mappers::CultureQueue> culture_queues;
@@ -378,7 +411,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CouncilsAreCreated)
 
    const auto leader_data = std::optional<Leader>({.sub_ideology = "sub_ideology"});
    const auto expected_council = Character({
-       .id = Character::GetGenId(),
+       .id = 1000,
        .first_name = "The",
        .last_name = "Council",
        .leader_data = leader_data,
@@ -397,27 +430,28 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, CouncilsAreCreated)
        characters,
        culture_queues);
 
-   EXPECT_THAT(characters, testing::UnorderedElementsAre(testing::Pair(Character::GetGenId() - 1, expected_council)));
+   EXPECT_THAT(characters, testing::UnorderedElementsAre(testing::Pair(1000, expected_council)));
 }
 
 
+// NOLINTNEXTLINE(cert-err58-cpp)
 TEST(Hoi4worldCharactersHoi4charactersconverter, NewlyGeneratedCharactersDontCollideWithExisting)
 {
    // Have a source character with base genID:1000.
    // Input council laws, see that newly generated character resolves collision
    // SrcCharacter intact, old council with ID 1001, new council with 1002
    std::map<int, Character> characters{
-       {Character::GetGenId() + 1, hoi4::Character({.id = Character::GetGenId() + 1})},
+       {1001, hoi4::Character({.id = 1001})},
    };
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const std::map<int, vic3::Character> source_characters{
-       {Character::GetGenId(), vic3::Character({.id = Character::GetGenId()})},
+       {1000, vic3::Character({.id = 1000})},
    };
    const auto leader_type_mapper = mappers::ImportLeaderTypeMapper("configurables/leader_type_mappings.txt");
 
    const auto leader_data = std::optional<Leader>({.sub_ideology = "sub_ideology"});
    const auto expected_council = Character({
-       .id = Character::GetGenId() + 2,
+       .id = 1002,
        .first_name = "The",
        .last_name = "Council",
        .leader_data = leader_data,
@@ -437,21 +471,39 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, NewlyGeneratedCharactersDontCol
        culture_queues);
 
    EXPECT_THAT(characters,
-       testing::UnorderedElementsAre(
-           testing::Pair(Character::GetGenId() - 2, Character({.id = Character::GetGenId() - 2})),
-           testing::Pair(Character::GetGenId() - 1, expected_council)));
+       testing::UnorderedElementsAre(testing::Pair(1001, Character({.id = 1001})),
+           testing::Pair(1002, expected_council)));
 }
 
 
+// NOLINTNEXTLINE(cert-err58-cpp)
 TEST(Hoi4worldCharactersHoi4charactersconverter, PrimeMinistersAreFoundInCoalitionParties)
 {
    std::map<int, Character> characters;
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto leader_type_mapper = mappers::ImportLeaderTypeMapper("configurables/leader_type_mappings.txt");
    const std::map<int, vic3::InterestGroup> igs = {
-       {1, vic3::InterestGroup{"", 1, 4, 25.0F, true, {}}},
-       {2, vic3::InterestGroup{"", 1, 2, 35.0F, true, {}}},
-       {3, vic3::InterestGroup{"", 1, 3, 40.0F, false, {}}},
+       {1,
+           vic3::InterestGroup{"",
+               InterestGroupCountryId{1},
+               InterestGroupLeader{4},
+               InterestGroupClout{25.0F},
+               InterestGroupInGovernment{true},
+               {}}},
+       {2,
+           vic3::InterestGroup{"",
+               InterestGroupCountryId{1},
+               InterestGroupLeader{2},
+               InterestGroupClout{35.0F},
+               InterestGroupInGovernment{true},
+               {}}},
+       {3,
+           vic3::InterestGroup{"",
+               InterestGroupCountryId{1},
+               InterestGroupLeader{3},
+               InterestGroupClout{40.0F},
+               InterestGroupInGovernment{false},
+               {}}},
    };
    const auto head_of_state = vic3::Character({
        .id = 1,
@@ -514,15 +566,33 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, PrimeMinistersAreFoundInCoaliti
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, PrimeMinistersAreFoundInLeaderParty)
+TEST(Hoi4worldCharactersHoi4charactersconverter, PrimeMinistersAreFoundInLeaderParty)  // NOLINT(cert-err58-cpp)
 {
    std::map<int, Character> characters;
    std::map<std::string, mappers::CultureQueue> culture_queues;
    const auto leader_type_mapper = mappers::ImportLeaderTypeMapper("configurables/leader_type_mappings.txt");
    const std::map<int, vic3::InterestGroup> igs = {
-       {1, vic3::InterestGroup{"", 1, 4, 35.0F, true, {}}},
-       {2, vic3::InterestGroup{"", 1, 2, 25.0F, true, {}}},
-       {3, vic3::InterestGroup{"", 1, 3, 40.0F, false, {}}},
+       {1,
+           vic3::InterestGroup{"",
+               InterestGroupCountryId{1},
+               InterestGroupLeader{4},
+               InterestGroupClout{35.0F},
+               InterestGroupInGovernment{true},
+               {}}},
+       {2,
+           vic3::InterestGroup{"",
+               InterestGroupCountryId{1},
+               InterestGroupLeader{2},
+               InterestGroupClout{25.0F},
+               InterestGroupInGovernment{true},
+               {}}},
+       {3,
+           vic3::InterestGroup{"",
+               InterestGroupCountryId{1},
+               InterestGroupLeader{3},
+               InterestGroupClout{40.0F},
+               InterestGroupInGovernment{false},
+               {}}},
    };
    const auto head_of_state = vic3::Character({
        .id = 1,
@@ -585,7 +655,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, PrimeMinistersAreFoundInLeaderP
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, MonarchIdFromHeadOfStateId)
+TEST(Hoi4worldCharactersHoi4charactersconverter, MonarchIdFromHeadOfStateId)  // NOLINT(cert-err58-cpp)
 {
    std::map<int, Character> characters_map;
    std::map<std::string, mappers::CultureQueue> culture_queues;
@@ -608,7 +678,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, MonarchIdFromHeadOfStateId)
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, NoMonarchIdIfShouldHaveMonarchIdeaFalse)
+TEST(Hoi4worldCharactersHoi4charactersconverter, NoMonarchIdIfShouldHaveMonarchIdeaFalse)  // NOLINT(cert-err58-cpp)
 {
    std::map<int, Character> characters_map;
    std::map<std::string, mappers::CultureQueue> culture_queues;
@@ -630,7 +700,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, NoMonarchIdIfShouldHaveMonarchI
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsPreservedOnSamePlaythrough)
+TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsPreservedOnSamePlaythrough)  // NOLINT(cert-err58-cpp)
 {
    const auto culture_graphics_mapper = mappers::ImportCultureGraphicsMapper("configurables/culture_graphics.txt");
    std::map<int, Character> characters_one{
@@ -655,7 +725,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsPreservedOnSamePlaythrou
        {"culture_2", {{"operative_female", {1, 2, 3, 4, 5, 6, 7}}}},
    };
    const std::map<std::string, vic3::CultureDefinition> source_cultures{
-       {"culture_2", vic3::CultureDefinition({"culture_2"}, {}, {}, {})},
+       {"culture_2", vic3::CultureDefinition({.name = "culture_2"})},
    };
 
    AssignPortraits(culture_queues, culture_graphics_mapper, source_cultures, 10, characters_one);
@@ -664,7 +734,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsPreservedOnSamePlaythrou
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsChangedOnDifferentPlaythrough)
+TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsChangedOnDifferentPlaythrough)  // NOLINT(cert-err58-cpp)
 {
    const auto culture_graphics_mapper = mappers::ImportCultureGraphicsMapper("configurables/culture_graphics.txt");
    std::map<int, Character> characters_one{
@@ -689,7 +759,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsChangedOnDifferentPlayth
        {"culture_2", {{"operative_female", {1, 2, 3, 4, 5, 6, 7}}}},
    };
    const std::map<std::string, vic3::CultureDefinition> source_cultures{
-       {"culture_2", vic3::CultureDefinition({"culture_2"}, {}, {}, {})},
+       {"culture_2", vic3::CultureDefinition({.name = "culture_2"})},
    };
 
    AssignPortraits(culture_queues, culture_graphics_mapper, source_cultures, 10, characters_one);
@@ -698,7 +768,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, OrderIsChangedOnDifferentPlayth
 }
 
 
-TEST(Hoi4worldCharactersHoi4charactersconverter, PreferUnusedPortraitsBetweenCultures)
+TEST(Hoi4worldCharactersHoi4charactersconverter, PreferUnusedPortraitsBetweenCultures)  // NOLINT(cert-err58-cpp)
 {
    // Have ~5 cultures using the same ~5 portraits in the same input order for 1 character each.
    // Portrait usage will be [2 2 1] instead of [5 0 0]
@@ -719,11 +789,11 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, PreferUnusedPortraitsBetweenCul
    };
    // Each culture has an army portrait list of the same length, so they will all be shuffled the same way
    const std::map<std::string, vic3::CultureDefinition> source_cultures{
-       {"culture_3", vic3::CultureDefinition({"culture_3"}, {}, {}, {})},
-       {"culture_4", vic3::CultureDefinition({"culture_4"}, {}, {}, {})},
-       {"culture_5", vic3::CultureDefinition({"culture_5"}, {}, {}, {})},
-       {"culture_6", vic3::CultureDefinition({"culture_6"}, {}, {}, {})},
-       {"culture_7", vic3::CultureDefinition({"culture_7"}, {}, {}, {})},
+       {"culture_3", vic3::CultureDefinition({.name = "culture_3"})},
+       {"culture_4", vic3::CultureDefinition({.name = "culture_4"})},
+       {"culture_5", vic3::CultureDefinition({.name = "culture_5"})},
+       {"culture_6", vic3::CultureDefinition({.name = "culture_6"})},
+       {"culture_7", vic3::CultureDefinition({.name = "culture_7"})},
    };
 
    AssignPortraits(culture_queues, culture_graphics_mapper, source_cultures, 10, characters);
@@ -742,6 +812,7 @@ TEST(Hoi4worldCharactersHoi4charactersconverter, PreferUnusedPortraitsBetweenCul
 }
 
 
+// NOLINTNEXTLINE(cert-err58-cpp)
 TEST(Hoi4worldCharactersHoi4charactersconverter, GetMonarchIdeaNameConcatenatesTagAndCharacterName)
 {
    const std::string idea_name =

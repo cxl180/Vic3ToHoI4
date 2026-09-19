@@ -10,7 +10,7 @@ namespace vic3
 {
 
 
-TEST(Vic3worldCharactersVic3characterimporter, DefaultsDefaultToDefault)
+TEST(Vic3worldCharactersVic3characterimporter, DefaultsDefaultToDefault)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 
@@ -34,7 +34,7 @@ TEST(Vic3worldCharactersVic3characterimporter, DefaultsDefaultToDefault)
 }
 
 
-TEST(Vic3worldCharactersVic3characterimporter, CharacterCanBeImported)
+TEST(Vic3worldCharactersVic3characterimporter, CharacterCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 
@@ -44,31 +44,38 @@ TEST(Vic3worldCharactersVic3characterimporter, CharacterCanBeImported)
    input << "\tlast_name = \"Wala\"\n";
    input << "\tculture = 1\n";
    input << "\tis_female = yes\n";
+   input << "\tinterest_group = 2\n";
    input << "\trole = politician\n";
    input << "\trole = agitator\n";
+   input << "\tcharacter_roles = { test_role_three test_role_four }\n";
    input << "\tideology = \"ideology_0\"\n";
    input << "\trank = commander_rank_5\n";
    input << "\ttraits = { \"trait_0\" \"trait_1\" }\n";
+   input << "\tcountry = 4\n";
    input << "\tformation = 238\n";
    input << "}\n";
 
    const auto character = character_importer.ImportCharacter(1, input);
 
    EXPECT_EQ(character,
-       Character({.id = 1,
+       Character({
+           .id = 1,
            .first_name = "Cabdi",
            .last_name = "Wala",
            .culture_id = 1,
            .is_female = true,
-           .roles = {"politician", "agitator"},
+           .ig_id = 2,
+           .roles = {"politician", "agitator", "test_role_three", "test_role_four"},
            .rank = 5,
            .ideology = "ideology_0",
            .traits = {"trait_0", "trait_1"},
-           .formation_id = 238}));
+           .origin_country_id = 4,
+           .formation_id = 238,
+       }));
 }
 
 
-TEST(Vic3worldCharactersVic3characterimporter, RulerCommanderIsFirstRank)
+TEST(Vic3worldCharactersVic3characterimporter, RulerCommanderIsFirstRank)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 
@@ -83,7 +90,7 @@ TEST(Vic3worldCharactersVic3characterimporter, RulerCommanderIsFirstRank)
 }
 
 
-TEST(Vic3worldCharactersVic3characterimporter, InvalidRankIsLogged)
+TEST(Vic3worldCharactersVic3characterimporter, InvalidRankIsLogged)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 
@@ -105,7 +112,7 @@ TEST(Vic3worldCharactersVic3characterimporter, InvalidRankIsLogged)
 }
 
 
-TEST(Vic3worldCharactersVic3characterimporter, CultureCanBeSet)
+TEST(Vic3worldCharactersVic3characterimporter, CultureCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 
@@ -118,7 +125,7 @@ TEST(Vic3worldCharactersVic3characterimporter, CultureCanBeSet)
 }
 
 
-TEST(Vic3worldCharactersVic3characterimporter, HomeTagCanBeSet)
+TEST(Vic3worldCharactersVic3characterimporter, HomeTagCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 
@@ -131,7 +138,7 @@ TEST(Vic3worldCharactersVic3characterimporter, HomeTagCanBeSet)
 }
 
 
-TEST(Vic3worldCharactersVic3characterimporter, IgIdCanBeSet)
+TEST(Vic3worldCharactersVic3characterimporter, IgIdCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 
@@ -144,7 +151,7 @@ TEST(Vic3worldCharactersVic3characterimporter, IgIdCanBeSet)
 }
 
 
-TEST(Vic3worldCharactersVic3characterimporter, CommanderCanBeSet)
+TEST(Vic3worldCharactersVic3characterimporter, CommanderCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    CharacterImporter character_importer;
 

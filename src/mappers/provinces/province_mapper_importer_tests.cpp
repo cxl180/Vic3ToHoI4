@@ -12,7 +12,7 @@
 namespace mappers
 {
 
-TEST(MappersProvincesProvinceMapperImporterTests, ProvinceMappingsCanBeImported)
+TEST(MappersProvincesProvinceMapperImporterTests, ProvinceMappingsCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    const commonItems::ModFilesystem mod_filesystem("./test_files/mappers/provinces/empty_definition/", {});
    const auto province_mappings = ProvinceMapperImporter{mod_filesystem}.ImportProvinceMappings();
@@ -30,7 +30,7 @@ TEST(MappersProvincesProvinceMapperImporterTests, ProvinceMappingsCanBeImported)
 }
 
 
-TEST(MappersProvincesProvinceMapperImporterTests, MissingMapDefinitionThrowsException)
+TEST(MappersProvincesProvinceMapperImporterTests, MissingMapDefinitionThrowsException)  // NOLINT(cert-err58-cpp)
 {
    const commonItems::ModFilesystem mod_filesystem("./test_files/mappers/provinces/no_definition/", {});
 
@@ -39,65 +39,65 @@ TEST(MappersProvincesProvinceMapperImporterTests, MissingMapDefinitionThrowsExce
 
 
 
-TEST(MappersProvincesProvinceMapperImporterTests, BadLineInMapDefinitionLogsWarning)
+TEST(MappersProvincesProvinceMapperImporterTests, BadLineInMapDefinitionLogsWarning)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
-   std::streambuf* stdOutBuf = std::cout.rdbuf();
+   std::streambuf* std_out_buf = std::cout.rdbuf();
    std::cout.rdbuf(log.rdbuf());
 
    const commonItems::ModFilesystem mod_filesystem("./test_files/mappers/provinces/bad_line_definition/", {});
    auto _ = ProvinceMapperImporter{mod_filesystem}.ImportProvinceMappings();
-   std::cout.rdbuf(stdOutBuf);
+   std::cout.rdbuf(std_out_buf);
 
    EXPECT_THAT(log.str(),
        testing::HasSubstr("[WARNING] Bad line in /map/definition.csv: bad_line;0;0;0;land;false;unknown;0"));
 }
 
 
-TEST(MappersProvincesProvinceMapperImporterTests, MissingHoi4ProvinceMappingLogsWarning)
+TEST(MappersProvincesProvinceMapperImporterTests, MissingHoi4ProvinceMappingLogsWarning)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
-   std::streambuf* stdOutBuf = std::cout.rdbuf();
+   std::streambuf* std_out_buf = std::cout.rdbuf();
    std::cout.rdbuf(log.rdbuf());
 
    const commonItems::ModFilesystem mod_filesystem("./test_files/mappers/provinces/missing_definition/", {});
    const auto province_mappings = ProvinceMapperImporter{mod_filesystem}.ImportProvinceMappings();
    const auto _ = province_mappings.GetHoi4ToVic3ProvinceMapping(12);
 
-   std::cout.rdbuf(stdOutBuf);
+   std::cout.rdbuf(std_out_buf);
 
    EXPECT_THAT(log.str(), testing::HasSubstr("[WARNING] No mapping for Hoi4 province 12"));
    EXPECT_THAT(log.str(), testing::HasSubstr("[WARNING] No mapping found for Hoi4 province 12"));
 }
 
 
-TEST(MappersProvincesProvinceMapperImporterTests, MissingVic3ProvinceMappingLogsWarning)
+TEST(MappersProvincesProvinceMapperImporterTests, MissingVic3ProvinceMappingLogsWarning)  // NOLINT(cert-err58-cpp)
 {
    const commonItems::ModFilesystem mod_filesystem("./test_files/mappers/provinces/empty_definition/", {});
    const auto province_mappings = ProvinceMapperImporter{mod_filesystem}.ImportProvinceMappings();
 
    std::stringstream log;
-   std::streambuf* stdOutBuf = std::cout.rdbuf();
+   std::streambuf* std_out_buf = std::cout.rdbuf();
    std::cout.rdbuf(log.rdbuf());
 
    const auto _ = province_mappings.GetVic3ToHoi4ProvinceMapping("0x000012");
 
-   std::cout.rdbuf(stdOutBuf);
+   std::cout.rdbuf(std_out_buf);
 
    EXPECT_THAT(log.str(), testing::HasSubstr("[WARNING] No mapping found for Vic3 province 0x000012"));
 }
 
 
-TEST(MappersProvincesProvinceMapperImporterTests, ExtraProvinceMappingsLogWarning)
+TEST(MappersProvincesProvinceMapperImporterTests, ExtraProvinceMappingsLogWarning)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
-   std::streambuf* stdOutBuf = std::cout.rdbuf();
+   std::streambuf* std_out_buf = std::cout.rdbuf();
    std::cout.rdbuf(log.rdbuf());
 
    const commonItems::ModFilesystem mod_filesystem("./test_files/mappers/provinces/good_definition/", {});
    [[maybe_unused]] const auto province_mappings = ProvinceMapperImporter{mod_filesystem}.ImportProvinceMappings();
 
-   std::cout.rdbuf(stdOutBuf);
+   std::cout.rdbuf(std_out_buf);
 
    EXPECT_THAT(log.str(), testing::HasSubstr("[WARNING] Vic3 province x000001 was in multiple mappings."));
    EXPECT_THAT(log.str(), testing::HasSubstr("[WARNING] Hoi4 province 1 was in multiple mappings."));

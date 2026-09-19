@@ -71,9 +71,6 @@ types = {
 		arrow = {
 		    type = air
 		}
-        unit_model = {
-            type = equipment
-        }
 
 		unit_requirements = {
 			equipment = {
@@ -320,9 +317,6 @@ types = {
 		arrow = {
 		    type = air
 		}
-        unit_model = {
-            type = equipment
-        }
 
 		unit_requirements = {
 			equipment = {
@@ -571,9 +565,6 @@ types = {
 		arrow = {
 		    type = air
 		}
-        unit_model = {
-            type = equipment
-        }
 
 		unit_requirements = {
 			equipment = {
@@ -817,7 +808,7 @@ types = {
 
 	oilfield_raid = {
 		days_to_prepare = 90
-
+		
 		ai_will_do = {
 			base = 1
 			modifier = {
@@ -848,7 +839,6 @@ types = {
 		}
 		# Raid Type is visible
 		visible = {
-
 		}
 		# Specific Target is visible
 		show_target = {
@@ -893,9 +883,6 @@ types = {
 		arrow = {
 		    type = air
 		}
-        unit_model = {
-            type = equipment
-        }
 		launch_sound = raid_launch_air
 
 		unit_requirements = {
@@ -1133,9 +1120,6 @@ types = {
 		arrow = {
 		    type = air
 		}
-        unit_model = {
-            type = equipment
-        }
 
 		unit_requirements = {
 			equipment = {
@@ -1359,9 +1343,6 @@ types = {
 		arrow = {
 		    type = air
 		}
-        unit_model = {
-            type = equipment
-        }
 
 		unit_requirements = {
 			equipment = {

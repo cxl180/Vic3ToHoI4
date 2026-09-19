@@ -8,11 +8,11 @@
 namespace vic3
 {
 
-TEST(Vic3WorldPact, SubjectRelationshipsAreDetermined)
+TEST(Vic3WorldPact, SubjectRelationshipsAreDetermined)  // NOLINT(cert-err58-cpp)
 {
-   Pact puppet = Pact(0, 1, "puppet", date(""), std::nullopt);
-   EXPECT_TRUE(puppet.isSubjectRelationship());
-   Pact alliance = Pact(2, 3, "alliance", date(""), std::nullopt);
-   EXPECT_FALSE(alliance.isSubjectRelationship());
+   const Pact puppet = Pact(PactPartners{.first = 0, .second = 1}, "puppet", date(""), std::nullopt);
+   EXPECT_TRUE(puppet.IsSubjectRelationship());
+   const Pact alliance = Pact(PactPartners{.first = 2, .second = 3}, "alliance", date(""), std::nullopt);
+   EXPECT_FALSE(alliance.IsSubjectRelationship());
 }
 }  // namespace vic3

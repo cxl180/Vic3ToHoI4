@@ -55,13 +55,15 @@ WorldFrameworkBuilder WorldFrameworkBuilder::CreateNullWorldFramework()
 }
 WorldFramework WorldFrameworkBuilder::Build()
 {
-   return WorldFramework(std::move(this->strategic_regions_),
+   return {
+       std::move(this->strategic_regions_),
        std::move(this->default_states_),
        std::move(this->resources_map_),
        std::move(this->state_categories_),
        maps::ProvinceDefinitions{std::move(this->province_definitions_)},
        std::move(this->map_data_),
-       CoastalProvinces{std::move(this->coastal_provinces_)});
+       CoastalProvinces{std::move(this->coastal_provinces_)},
+   };
 }
 
 WorldFrameworkBuilder& WorldFrameworkBuilder::DefaultStrategicRegions()
@@ -70,7 +72,7 @@ WorldFrameworkBuilder& WorldFrameworkBuilder::DefaultStrategicRegions()
    return *this;
 }
 
-WorldFrameworkBuilder& WorldFrameworkBuilder::SetStrategicRegions(const StrategicRegions strategic_regions)
+WorldFrameworkBuilder& WorldFrameworkBuilder::SetStrategicRegions(const StrategicRegions& strategic_regions)
 {
    this->strategic_regions_ = strategic_regions;
    return *this;
@@ -82,9 +84,9 @@ WorldFrameworkBuilder& WorldFrameworkBuilder::DefaultDefaultStates()
    return *this;
 }
 
-WorldFrameworkBuilder& WorldFrameworkBuilder::AddDefaultStates(const std::map<int, DefaultState> defaultStates)
+WorldFrameworkBuilder& WorldFrameworkBuilder::AddDefaultStates(const std::map<int, DefaultState>& default_states)
 {
-   for (auto& state: defaultStates)
+   for (const auto& state: default_states)
    {
       this->default_states_.emplace(state);
    }
@@ -137,7 +139,7 @@ WorldFrameworkBuilder& WorldFrameworkBuilder::AddLandProvinces(std::vector<std::
 {
    for (const auto& id: province_ids)
    {
-      province_definitions_.land_provinces.emplace(id);
+      province_definitions_.AddLandProvince(id);
    }
    return *this;
 }
@@ -147,7 +149,7 @@ WorldFrameworkBuilder& WorldFrameworkBuilder::AddTestLandProvinces(int count)
    for (int i = 0; i < count; ++i)
    {
       test_province_number_ += 10;
-      province_definitions_.land_provinces.emplace(fmt::format("{}", test_province_number_));
+      province_definitions_.AddLandProvince(fmt::format("{}", test_province_number_));
    }
    return *this;
 }
@@ -156,20 +158,33 @@ WorldFrameworkBuilder& WorldFrameworkBuilder::AddSeaProvinces(std::vector<std::s
 {
    for (const auto& id: province_ids)
    {
-      province_definitions_.sea_provinces.emplace(id);
+      province_definitions_.AddSeaProvince(id);
    }
    return *this;
 }
 
+
+WorldFrameworkBuilder& WorldFrameworkBuilder::AddProvinceContinents(std::vector<std::string> province_ids,
+    std::string_view continent)
+{
+   for (const std::string& id: province_ids)
+   {
+      province_definitions_.AddProvinceToContinent(id, continent);
+   }
+   return *this;
+}
+
+
 maps::ProvinceDefinitions WorldFrameworkBuilder::CopyProvinceDefinitions()
 {
-   return maps::ProvinceDefinitions{this->province_definitions_};
+   return maps::ProvinceDefinitions{province_definitions_};
 }
 
 
 WorldFrameworkBuilder& WorldFrameworkBuilder::DefaultMapData()
 {
-   map_data_ = maps::MapDataImporter(province_definitions_).ImportMapData(this->hoi4_mod_filesystem_);
+   map_data_ = maps::MapDataImporter(maps::ProvinceDefinitions{province_definitions_})
+                   .ImportMapData(this->hoi4_mod_filesystem_);
    return *this;
 }
 
@@ -183,12 +198,12 @@ WorldFrameworkBuilder& WorldFrameworkBuilder::SetMapData(const maps::MapData& ma
 WorldFrameworkBuilder& WorldFrameworkBuilder::DefaultCoastalProvinces()
 {
    this->coastal_provinces_ = CreateCoastalProvinces(map_data_,
-       this->province_definitions_.land_provinces,
-       this->province_definitions_.sea_provinces);
+       LandProvinces{province_definitions_.GetLandProvinces()},
+       SeaProvinces{province_definitions_.GetSeaProvinces()});
    return *this;
 }
 
-WorldFrameworkBuilder& WorldFrameworkBuilder::AddCoastalProvinces(CoastalProvinces::storage_type provinces)
+WorldFrameworkBuilder& WorldFrameworkBuilder::AddCoastalProvinces(const std::map<int, std::vector<int>>& provinces)
 {
    for (const auto& province: provinces)
    {

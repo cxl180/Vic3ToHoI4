@@ -11,7 +11,7 @@ double CalculateDistanceSquared(const maps::Point point, const maps::Point cente
 {
    const auto delta_x = static_cast<double>(point.x) - static_cast<double>(center.x);
    const auto delta_y = static_cast<double>(point.y) - static_cast<double>(center.y);
-   return delta_x * delta_x + delta_y * delta_y;
+   return (delta_x * delta_x) + (delta_y * delta_y);
 }
 
 }  // namespace
@@ -77,7 +77,7 @@ maps::Point maps::ProvincePoints::GetCentermostPoint() const
    }
 
    auto shortest_distance = std::numeric_limits<double>::max();
-   Point closest_point{0, 0};
+   Point closest_point{.x = 0, .y = 0};
    for (const auto& possible_point: points_)
    {
       const auto distance_squared = CalculateDistanceSquared(possible_point, possible_center);

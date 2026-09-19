@@ -15,9 +15,13 @@
 namespace out
 {
 
-TEST(Outhoi4MilitaryEquipmentvariant, VariantCanBeOutput)
+TEST(Outhoi4MilitaryEquipmentvariant, VariantCanBeOutput)  // NOLINT(cert-err58-cpp)
 {
-   hoi4::EquipmentVariant variant("test_variant", "test_type", {}, {}, {{"complex_item", "= {\n\tfoo = bar\n}"}});
+   const hoi4::EquipmentVariant variant(hoi4::EquipmentVariantName{"test_variant"},
+       hoi4::EquipmentVariantType{"test_type"},
+       {},
+       {},
+       {{"complex_item", "= {\n\tfoo = bar\n}"}});
 
    std::stringstream out;
    out << variant;
@@ -31,10 +35,10 @@ TEST(Outhoi4MilitaryEquipmentvariant, VariantCanBeOutput)
 }
 
 
-TEST(Outhoi4MilitaryEquipmentvariant, RequiredTechsAreNotOutput)
+TEST(Outhoi4MilitaryEquipmentvariant, RequiredTechsAreNotOutput)  // NOLINT(cert-err58-cpp)
 {
-   hoi4::EquipmentVariant variant("test_variant",
-       "",
+   const hoi4::EquipmentVariant variant(hoi4::EquipmentVariantName{"test_variant"},
+       hoi4::EquipmentVariantType{""},
        {"required_tech_one", "required_tech_two"},
        {},
        {{"complex_item", "= {\n\tfoo = bar\n}"}});
@@ -50,10 +54,10 @@ TEST(Outhoi4MilitaryEquipmentvariant, RequiredTechsAreNotOutput)
 }
 
 
-TEST(Outhoi4MilitaryEquipmentvariant, BlockingTechsAreNotOutput)
+TEST(Outhoi4MilitaryEquipmentvariant, BlockingTechsAreNotOutput)  // NOLINT(cert-err58-cpp)
 {
-   hoi4::EquipmentVariant variant("test_variant",
-       "",
+   const hoi4::EquipmentVariant variant(hoi4::EquipmentVariantName{"test_variant"},
+       hoi4::EquipmentVariantType{""},
        {},
        {"blocking_tech_one", "blocking_tech_two"},
        {{"complex_item", "= {\n\tfoo = bar\n}"}});

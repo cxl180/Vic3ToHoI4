@@ -10,65 +10,65 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldMapCoastalProvincesCreatorTests, CoastalProvincesDefaultToEmpty)
+TEST(Hoi4worldMapCoastalProvincesCreatorTests, CoastalProvincesDefaultToEmpty)  // NOLINT(cert-err58-cpp)
 {
    const maps::ProvinceDefinitions province_definitions;
    const maps::MapData map_data({.province_definitions = province_definitions});
    const CoastalProvinces coastal_provinces = CoastalProvinces{CreateCoastalProvinces(map_data,
-       province_definitions.GetLandProvinces(),
-       province_definitions.GetSeaProvinces())};
+       LandProvinces{province_definitions.GetLandProvinces()},
+       SeaProvinces{province_definitions.GetSeaProvinces()})};
 
    EXPECT_TRUE(coastal_provinces.GetCoastalProvinces().empty());
 }
 
 
-TEST(Hoi4worldMapCoastalProvincesCreatorTests, CoastalProvincesAreDetected)
+TEST(Hoi4worldMapCoastalProvincesCreatorTests, CoastalProvincesAreDetected)  // NOLINT(cert-err58-cpp)
 {
    const maps::ProvinceDefinitions province_definitions({.land_provinces = {"1"}, .sea_provinces = {"2"}});
    const maps::MapData map_data({.province_neighbors = {{"1", {"2"}}}, .province_definitions = province_definitions});
    const CoastalProvinces coastal_provinces = CoastalProvinces{CreateCoastalProvinces(map_data,
-       province_definitions.GetLandProvinces(),
-       province_definitions.GetSeaProvinces())};
+       LandProvinces{province_definitions.GetLandProvinces()},
+       SeaProvinces{province_definitions.GetSeaProvinces()})};
 
    EXPECT_THAT(coastal_provinces.GetCoastalProvinces(),
        testing::UnorderedElementsAre(testing::Pair(1, std::vector{2})));
 }
 
 
-TEST(Hoi4worldMapCoastalProvincesCreatorTests, MultipleConnectingSeaProvincesAreDetected)
+TEST(Hoi4worldMapCoastalProvincesCreatorTests, MultipleConnectingSeaProvincesAreDetected)  // NOLINT(cert-err58-cpp)
 {
    const maps::ProvinceDefinitions province_definitions({.land_provinces = {"1"}, .sea_provinces = {"2", "3"}});
    const maps::MapData map_data(
        {.province_neighbors = {{"1", {"2", "3"}}}, .province_definitions = province_definitions});
    const CoastalProvinces coastal_provinces = CoastalProvinces{CreateCoastalProvinces(map_data,
-       province_definitions.GetLandProvinces(),
-       province_definitions.GetSeaProvinces())};
+       LandProvinces{province_definitions.GetLandProvinces()},
+       SeaProvinces{province_definitions.GetSeaProvinces()})};
 
    EXPECT_THAT(coastal_provinces.GetCoastalProvinces(),
        testing::UnorderedElementsAre(testing::Pair(1, std::vector{2, 3})));
 }
 
 
-TEST(Hoi4worldMapCoastalProvincesCreatorTests, NeighboringLandProvincesDoNotMakeForCoasts)
+TEST(Hoi4worldMapCoastalProvincesCreatorTests, NeighboringLandProvincesDoNotMakeForCoasts)  // NOLINT(cert-err58-cpp)
 {
    const maps::ProvinceDefinitions province_definitions({.land_provinces = {"1", "2"}});
    const maps::MapData map_data({.province_neighbors = {{"1", {"2"}}}, .province_definitions = province_definitions});
    const CoastalProvinces coastal_provinces = CoastalProvinces{CreateCoastalProvinces(map_data,
-       province_definitions.GetLandProvinces(),
-       province_definitions.GetSeaProvinces())};
+       LandProvinces{province_definitions.GetLandProvinces()},
+       SeaProvinces{province_definitions.GetSeaProvinces()})};
 
    EXPECT_TRUE(coastal_provinces.GetCoastalProvinces().empty());
 }
 
 
-TEST(Hoi4worldMapCoastalProvincesCreatorTests, BadProvinceNamesAreSkipped)
+TEST(Hoi4worldMapCoastalProvincesCreatorTests, BadProvinceNamesAreSkipped)  // NOLINT(cert-err58-cpp)
 {
    const maps::ProvinceDefinitions province_definitions({.land_provinces = {"1", "a"}, .sea_provinces = {"2", "b"}});
    const maps::MapData map_data(
        {.province_neighbors = {{"1", {"2", "b"}}, {"a", {"2", "b"}}}, .province_definitions = province_definitions});
    const CoastalProvinces coastal_provinces = CoastalProvinces{CreateCoastalProvinces(map_data,
-       province_definitions.GetLandProvinces(),
-       province_definitions.GetSeaProvinces())};
+       LandProvinces{province_definitions.GetLandProvinces()},
+       SeaProvinces{province_definitions.GetSeaProvinces()})};
 
    EXPECT_THAT(coastal_provinces.GetCoastalProvinces(),
        testing::UnorderedElementsAre(testing::Pair(1, std::vector{2})));

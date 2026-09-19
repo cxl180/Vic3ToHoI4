@@ -9,7 +9,7 @@ namespace configuration
 {
 
 
-TEST(ConfigurationTest, DefaultsAreDefaulted)
+TEST(ConfigurationTest, DefaultsAreDefaulted)  // NOLINT(cert-err58-cpp)
 {
    const auto configuration =
        ImportConfiguration("test_files/configuration/blank_configuration.txt", commonItems::ConverterVersion());
@@ -24,43 +24,44 @@ TEST(ConfigurationTest, DefaultsAreDefaulted)
    EXPECT_FALSE(configuration.debug);
    EXPECT_EQ(configuration.output_name, "test_save");  // if not specified, derived from the save
    EXPECT_TRUE(configuration.dynamic_resources);
-   EXPECT_EQ(configuration.use_stories, UseStories::kNo);
 }
 
 
-TEST(ConfigurationTest, ExceptionForMissingVic3Directory)
+TEST(ConfigurationTest, ExceptionForMissingVic3Directory)  // NOLINT(cert-err58-cpp)
 {
-   EXPECT_THROW(const auto _ = ImportConfiguration("test_files/configuration/missing_vic3_directory.txt",
+   EXPECT_THROW(
+       [[maybe_unused]] const auto _ =
+           ImportConfiguration("test_files/configuration/missing_vic3_directory.txt", commonItems::ConverterVersion()),
+       std::runtime_error);
+}
+
+
+TEST(ConfigurationTest, ExceptionForBadVic3Directory)  // NOLINT(cert-err58-cpp)
+{
+   EXPECT_THROW([[maybe_unused]] const auto _ = ImportConfiguration("test_files/configuration/bad_vic3_directory.txt",
                     commonItems::ConverterVersion()),
        std::runtime_error);
 }
 
 
-TEST(ConfigurationTest, ExceptionForBadVic3Directory)
+TEST(ConfigurationTest, ExceptionForMissingHoI4Directory)  // NOLINT(cert-err58-cpp)
 {
-   EXPECT_THROW(const auto _ = ImportConfiguration("test_files/configuration/bad_vic3_directory.txt",
+   EXPECT_THROW(
+       [[maybe_unused]] const auto _ =
+           ImportConfiguration("test_files/configuration/missing_hoi4_directory.txt", commonItems::ConverterVersion()),
+       std::runtime_error);
+}
+
+
+TEST(ConfigurationTest, ExceptionForBadHoI4Directory)  // NOLINT(cert-err58-cpp)
+{
+   EXPECT_THROW([[maybe_unused]] const auto _ = ImportConfiguration("test_files/configuration/bad_hoi4_directory.txt",
                     commonItems::ConverterVersion()),
        std::runtime_error);
 }
 
 
-TEST(ConfigurationTest, ExceptionForMissingHoI4Directory)
-{
-   EXPECT_THROW(const auto _ = ImportConfiguration("test_files/configuration/missing_hoi4_directory.txt",
-                    commonItems::ConverterVersion()),
-       std::runtime_error);
-}
-
-
-TEST(ConfigurationTest, ExceptionForBadHoI4Directory)
-{
-   EXPECT_THROW(const auto _ = ImportConfiguration("test_files/configuration/bad_hoi4_directory.txt",
-                    commonItems::ConverterVersion()),
-       std::runtime_error);
-}
-
-
-TEST(ConfigurationTest, ItemsCanBeImported)
+TEST(ConfigurationTest, ItemsCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    const auto configuration =
        ImportConfiguration("test_files/configuration/test_configuration.txt", commonItems::ConverterVersion());
@@ -74,11 +75,10 @@ TEST(ConfigurationTest, ItemsCanBeImported)
    EXPECT_TRUE(configuration.debug);
    EXPECT_EQ(configuration.output_name, "test_output_name");
    EXPECT_FALSE(configuration.dynamic_resources);
-   EXPECT_EQ(configuration.use_stories, UseStories::kYes);
 }
 
 
-TEST(ConfigurationTest, ItemsAreLoggedWhenImported)
+TEST(ConfigurationTest, ItemsAreLoggedWhenImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
    std::streambuf* cout_buffer = std::cout.rdbuf();
@@ -97,21 +97,20 @@ TEST(ConfigurationTest, ItemsAreLoggedWhenImported)
    EXPECT_THAT(log.str(), testing::HasSubstr(R"(Debug is active)"));
    EXPECT_THAT(log.str(), testing::HasSubstr(R"(Using output name test_output_name)"));
    EXPECT_THAT(log.str(), testing::HasSubstr(R"(Dynamic resources is not active)"));
-   EXPECT_THAT(log.str(), testing::HasSubstr(R"(Stories system is active)"));
 
    std::cout.rdbuf(cout_buffer);
 }
 
 
-TEST(ConfigurationTest, BadSaveNameThrowsException)
+TEST(ConfigurationTest, BadSaveNameThrowsException)  // NOLINT(cert-err58-cpp)
 {
-   EXPECT_THROW(const auto _ =
+   EXPECT_THROW([[maybe_unused]] const auto _ =
                     ImportConfiguration("test_files/configuration/bad_save_name.txt", commonItems::ConverterVersion()),
        std::invalid_argument);
 }
 
 
-TEST(ConfigurationTest, OutputNameIsFromSave)
+TEST(ConfigurationTest, OutputNameIsFromSave)  // NOLINT(cert-err58-cpp)
 {
    const auto configuration = ImportConfiguration("test_files/configuration/output_name_from_save_configuration.txt",
        commonItems::ConverterVersion());
@@ -120,7 +119,7 @@ TEST(ConfigurationTest, OutputNameIsFromSave)
 }
 
 
-TEST(ConfigurationTest, CustomOutputOverridesSaveOutputName)
+TEST(ConfigurationTest, CustomOutputOverridesSaveOutputName)  // NOLINT(cert-err58-cpp)
 {
    const auto configuration =
        ImportConfiguration("test_files/configuration/output_name_override.txt", commonItems::ConverterVersion());

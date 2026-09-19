@@ -9,7 +9,7 @@ namespace vic3
 {
 
 
-TEST(Vic3WorldElectionsElectionsImporter, NoElectionsOnEmptyInput)
+TEST(Vic3WorldElectionsElectionsImporter, NoElectionsOnEmptyInput)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const std::map<int, date> elections = ImportElections(input);
@@ -18,7 +18,7 @@ TEST(Vic3WorldElectionsElectionsImporter, NoElectionsOnEmptyInput)
 }
 
 
-TEST(Vic3WorldElectionsElectionsImporter, ElectionsCanBeImported)
+TEST(Vic3WorldElectionsElectionsImporter, ElectionsCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -28,7 +28,7 @@ TEST(Vic3WorldElectionsElectionsImporter, ElectionsCanBeImported)
    input << "\tlast_election = 1839.9.29\n";
    input << "}\n";
    input << "1 ={ \n";
-   input << "\tcountry = 2\n";
+   input << "\tcountry = 3019898882\n";
    input << "\tlast_election = 1935.11.4\n";
    input << "}\n";
    input << "\t}\n";
@@ -37,11 +37,12 @@ TEST(Vic3WorldElectionsElectionsImporter, ElectionsCanBeImported)
    const std::map<int, date> elections = ImportElections(input);
 
    EXPECT_THAT(elections,
-       testing::UnorderedElementsAre(testing::Pair(1, date{"1839.9.29"}), testing::Pair(2, date{"1935.11.4"})));
+       testing::UnorderedElementsAre(testing::Pair(1, date{"1839.9.29"}),
+           testing::Pair(-1275068414, date{"1935.11.4"})));
 }
 
 
-TEST(Vic3WorldElectionsElectionsImporter, ElectionsSetAsNoneAreSkipped)
+TEST(Vic3WorldElectionsElectionsImporter, ElectionsSetAsNoneAreSkipped)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -57,7 +58,7 @@ TEST(Vic3WorldElectionsElectionsImporter, ElectionsSetAsNoneAreSkipped)
 
 
 
-TEST(Vic3WorldElectionsElectionsImporter, ElectionsWithoutCountryAreLogged)
+TEST(Vic3WorldElectionsElectionsImporter, ElectionsWithoutCountryAreLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
    std::streambuf* cout_buffer = std::cout.rdbuf();
@@ -81,7 +82,7 @@ TEST(Vic3WorldElectionsElectionsImporter, ElectionsWithoutCountryAreLogged)
            R"([WARNING] Election without a country. Please report to the converters team and upload your save.)"));
 }
 
-TEST(Vic3WorldElectionsElectionsImporter, ElectionsImportsAreLogged)
+TEST(Vic3WorldElectionsElectionsImporter, ElectionsImportsAreLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";

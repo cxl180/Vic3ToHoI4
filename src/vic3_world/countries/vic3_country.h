@@ -25,11 +25,11 @@ class World;
 /// </summary>
 enum class BudgetLevel
 {
-   VeryLow,
-   Low,
-   Medium,
-   High,
-   VeryHigh
+   kVeryLow,
+   kLow,
+   kMedium,
+   kHigh,
+   kVeryHigh
 };
 
 
@@ -37,15 +37,16 @@ struct CountryOptions
 {
    int number = 0;
    std::string tag;
-   bool is_dead;
+   bool is_dead = false;
    std::optional<std::string> dynamic_name;
    std::optional<std::string> dynamic_adjective;
    bool use_overlord_prefix = false;
    commonItems::Color color;
+   std::set<int> owned_states;
    std::optional<int> capital_state;
    std::string country_type;
    bool is_civil_war = false;
-   std::set<std::string> active_laws = {};
+   std::set<std::string> active_laws;
    std::set<int> primary_culture_ids;
    std::set<std::string> primary_cultures;
    std::optional<date> last_election;
@@ -55,21 +56,21 @@ struct CountryOptions
    std::set<int> puppets;
    std::optional<int> overlord;
    int legitimacy = 0;
-   BudgetLevel tax_level;
-   BudgetLevel salary_level;
-   BudgetLevel mil_salary_level;
-   std::map<int, MilitaryFormation> army_formations;
-   std::map<int, MilitaryFormation> navy_formations;
+   BudgetLevel tax_level = BudgetLevel::kVeryLow;
+   BudgetLevel salary_level = BudgetLevel::kVeryLow;
+   BudgetLevel mil_salary_level = BudgetLevel::kVeryLow;
+   std::map<int64_t, MilitaryFormation> army_formations;
+   std::map<int64_t, MilitaryFormation> navy_formations;
 };
 
 
 enum class RankCategory
 {
-   GreatPower,
-   MajorPower,
-   MinorPower,          // called "unrecognized regional power" if unrecognized
-   InsignificantPower,  // called "unrecognized power" if unrecognized
-   DecentralizedPower
+   kGreatPower,
+   kMajorPower,
+   kMinorPower,          // called "unrecognized regional power" if unrecognized
+   kInsignificantPower,  // called "unrecognized power" if unrecognized
+   kDecentralizedPower
 };
 
 
@@ -84,6 +85,7 @@ class Country
        dynamic_adjective_(std::move(options.dynamic_adjective)),
        use_overlord_prefix_(options.use_overlord_prefix),
        color_(options.color),
+       owned_states_(std::move(options.owned_states)),
        capital_state_(options.capital_state),
        country_type_(std::move(options.country_type)),
        is_civil_war_(options.is_civil_war),
@@ -112,6 +114,7 @@ class Country
    [[nodiscard]] const std::optional<std::string>& GetDynamicAdjective() const { return dynamic_adjective_; }
    [[nodiscard]] bool GetUseOverlordPrefix() const { return use_overlord_prefix_; }
    [[nodiscard]] const commonItems::Color& GetColor() const { return color_; }
+   [[nodiscard]] const std::set<int>& GetOwnedStates() const { return owned_states_; }
    [[nodiscard]] const std::optional<int>& GetCapitalState() const { return capital_state_; }
    [[nodiscard]] bool IsDecentralized() const { return country_type_ == "decentralized"; }
    /// Is the country a recognized or colonial nation
@@ -131,10 +134,10 @@ class Country
    [[nodiscard]] BudgetLevel GetTaxLevel() const { return tax_level_; }
    [[nodiscard]] BudgetLevel GetGovernmentSalaryLevel() const { return salary_level_; }
    [[nodiscard]] BudgetLevel GetMilitarySalaryLevel() const { return mil_salary_level_; }
-   [[nodiscard]] const std::map<int, MilitaryFormation>& GetArmyFormations() const { return army_formations_; }
-   [[nodiscard]] const std::map<int, MilitaryFormation>& GetNavyFormations() const { return navy_formations_; }
+   [[nodiscard]] const std::map<int64_t, MilitaryFormation>& GetArmyFormations() const { return army_formations_; }
+   [[nodiscard]] const std::map<int64_t, MilitaryFormation>& GetNavyFormations() const { return navy_formations_; }
 
-   void SetColor(commonItems::Color color) { color_ = std::move(color); }
+   void SetColor(commonItems::Color color) { color_ = color; }
    void SetActiveLaws(std::set<std::string> active_laws) { active_laws_ = std::move(active_laws); }
    void SetLastElection(date last_election) { last_election_ = last_election; }
    void AddPrimaryCulture(const std::string& culture) { primary_cultures_.emplace(culture); }
@@ -142,11 +145,11 @@ class Country
    void AddInterestGroupId(int ig_id) { ig_ids_.push_back(ig_id); }
    void AddPuppet(int puppet) { puppets_.insert(puppet); }
    void AddOverlord(int overlord) { overlord_ = overlord; }
-   void SetArmyFormations(const std::map<int, MilitaryFormation>& military_formations)
+   void SetArmyFormations(const std::map<int64_t, MilitaryFormation>& military_formations)
    {
       army_formations_ = military_formations;
    }
-   void SetNavyFormations(const std::map<int, MilitaryFormation>& military_formations)
+   void SetNavyFormations(const std::map<int64_t, MilitaryFormation>& military_formations)
    {
       navy_formations_ = military_formations;
    }
@@ -165,6 +168,7 @@ class Country
    std::optional<std::string> dynamic_adjective_;
    bool use_overlord_prefix_ = false;
    commonItems::Color color_;
+   std::set<int> owned_states_;
    std::optional<int> capital_state_;
    std::string country_type_;
    bool is_civil_war_;
@@ -181,8 +185,8 @@ class Country
    BudgetLevel tax_level_;
    BudgetLevel salary_level_;
    BudgetLevel mil_salary_level_;
-   std::map<int, MilitaryFormation> army_formations_;
-   std::map<int, MilitaryFormation> navy_formations_;
+   std::map<int64_t, MilitaryFormation> army_formations_;
+   std::map<int64_t, MilitaryFormation> navy_formations_;
 };
 
 }  // namespace vic3

@@ -61,6 +61,16 @@ combat_unit_type_light_tanks = {
   light_tank = 0.1
 }
 
+combat_unit_type_low_tier_marines = {
+  marine = 0.1
+}
+combat_unit_type_mid_tier_marines = {
+  marine = 0.2
+}
+combat_unit_type_high_tier_marines = {
+  marine = 0.4
+}
+
 
 pm_no_organization = {}
 pm_general_training = {}
@@ -165,4 +175,10 @@ pm_first_aid = {
 pm_field_hospitals = {
   equipment_scale = 10
 }
+
+# Silence warnings resulting from the landships bug.
+combat_unit_type_dreadnought = {}
+combat_unit_type_scout_cruiser = {}
+combat_unit_type_torpedo_boat = {}
+combat_unit_type_ironclad = {}
 

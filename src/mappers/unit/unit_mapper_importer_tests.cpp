@@ -11,13 +11,15 @@
 namespace mappers
 {
 
-TEST(MappersUnitUnitMapperImporterTests, RulesCanBeImported)
+TEST(MappersUnitUnitMapperImporterTests, RulesCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    const UnitMapper unit_mapper = ImportUnitMapper("test_files/mappers/unit/unit_mappings.txt");
    const auto battalions =
        unit_mapper.MakeBattalions({"pm_trench_infantry", "pm_cavalry_scouts", "some_other_thing"}, 1);
    EXPECT_THAT(battalions,
-       testing::UnorderedElementsAre(hoi4::Battalion("infantry", 50, 0.25F), hoi4::Battalion("cavalry", 50, 0.2F)));
+       testing::UnorderedElementsAre(
+           hoi4::Battalion("infantry", hoi4::BattalionEquipmentScaleType{50}, hoi4::BattalionStrengthType{0.25F}),
+           hoi4::Battalion("cavalry", hoi4::BattalionEquipmentScaleType{50}, hoi4::BattalionStrengthType{0.2F})));
 }
 
 }  // namespace mappers

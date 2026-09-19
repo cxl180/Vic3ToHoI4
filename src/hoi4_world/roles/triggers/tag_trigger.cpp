@@ -5,10 +5,10 @@
 namespace hoi4
 {
 
-bool TagTrigger::IsValid(const Scope& scope, [[maybe_unused]] const World& world) const
+bool TagTrigger::IsValid(const Context& context, [[maybe_unused]] const World& world) const
 {
-   const CountryScope* maybe_country = std::get_if<CountryScope>(&scope);
-   if (!maybe_country)
+   const CountryScope* maybe_country = std::get_if<CountryScope>(&context.this_scope);
+   if (maybe_country == nullptr)
    {
       return false;
    }

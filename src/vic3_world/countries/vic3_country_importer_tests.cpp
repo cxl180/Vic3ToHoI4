@@ -11,7 +11,7 @@ namespace vic3
 {
 
 
-TEST(Vic3WorldCountriesCountryImporter, NumberIsAsSet)
+TEST(Vic3WorldCountriesCountryImporter, NumberIsAsSet)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const auto country = CountryImporter{}.ImportCountry(42, input, {});
@@ -21,7 +21,7 @@ TEST(Vic3WorldCountriesCountryImporter, NumberIsAsSet)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, DefaultsAreDefaulted)
+TEST(Vic3WorldCountriesCountryImporter, DefaultsAreDefaulted)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const auto country = CountryImporter{}.ImportCountry(0, input, {});
@@ -33,6 +33,7 @@ TEST(Vic3WorldCountriesCountryImporter, DefaultsAreDefaulted)
    EXPECT_FALSE(country.value_or(Country({})).GetDynamicAdjective());
    EXPECT_FALSE(country.value_or(Country({})).GetUseOverlordPrefix());
    EXPECT_EQ(country.value_or(Country({})).GetColor(), commonItems::Color(std::array{0, 0, 0}));
+   EXPECT_TRUE(country.value_or(Country({})).GetOwnedStates().empty());
    EXPECT_EQ(country.value_or(Country({})).GetCapitalState(), std::nullopt);
    EXPECT_FALSE(country.value_or(Country({})).IsDecentralized());
    EXPECT_TRUE(country.value_or(Country({})).GetActiveLaws().empty());
@@ -44,7 +45,7 @@ TEST(Vic3WorldCountriesCountryImporter, DefaultsAreDefaulted)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, ItemsCanBeInput)
+TEST(Vic3WorldCountriesCountryImporter, ItemsCanBeInput)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -57,6 +58,7 @@ TEST(Vic3WorldCountriesCountryImporter, ItemsCanBeInput)
    input << "\tmap_color=rgb {\n";
    input << "\t\t8 89 54\n";
    input << "\t}\n";
+   input << "\tstates={ 1 2 3 }\n";
    input << "\tcapital=12345\n";
    input << "\tcountry_type=\"decentralized\"\n";
    input << "\tcultures={ 35 7 }\n";
@@ -71,6 +73,7 @@ TEST(Vic3WorldCountriesCountryImporter, ItemsCanBeInput)
    EXPECT_EQ(country.value_or(Country({})).GetDynamicAdjective().value_or(""), "dynamic_adjective");
    EXPECT_TRUE(country.value_or(Country({})).GetUseOverlordPrefix());
    EXPECT_EQ(country.value_or(Country({})).GetColor(), commonItems::Color(std::array{8, 89, 54}));
+   EXPECT_THAT(country.value_or(Country({})).GetOwnedStates(), testing::UnorderedElementsAre(1, 2, 3));
    EXPECT_EQ(country.value_or(Country({})).GetCapitalState(), std::optional<int>(12345));
    EXPECT_TRUE(country.value_or(Country({})).IsDecentralized());
    EXPECT_FALSE(country.value_or(Country({})).IsRecognized());
@@ -79,7 +82,7 @@ TEST(Vic3WorldCountriesCountryImporter, ItemsCanBeInput)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, LongSentinelValueMapsToNegativeOne)
+TEST(Vic3WorldCountriesCountryImporter, LongSentinelValueMapsToNegativeOne)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -94,7 +97,7 @@ TEST(Vic3WorldCountriesCountryImporter, LongSentinelValueMapsToNegativeOne)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, Pre1_5DynamicsCanBeImported)
+TEST(Vic3WorldCountriesCountryImporter, Pre1_5DynamicsCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -109,7 +112,7 @@ TEST(Vic3WorldCountriesCountryImporter, Pre1_5DynamicsCanBeImported)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, ColorCanBeFromColorDefinitions)
+TEST(Vic3WorldCountriesCountryImporter, ColorCanBeFromColorDefinitions)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -122,7 +125,7 @@ TEST(Vic3WorldCountriesCountryImporter, ColorCanBeFromColorDefinitions)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, MultipleCountriesCanBeImported)
+TEST(Vic3WorldCountriesCountryImporter, MultipleCountriesCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    CountryImporter country_importer;
 
@@ -151,7 +154,7 @@ TEST(Vic3WorldCountriesCountryImporter, MultipleCountriesCanBeImported)
    EXPECT_EQ(country_two.value_or(Country({})).GetCapitalState(), std::nullopt);
 }
 
-TEST(Vic3WorldCountriesCountryImporter, CivilWarDetected)
+TEST(Vic3WorldCountriesCountryImporter, CivilWarDetected)  // NOLINT(cert-err58-cpp)
 {
    CountryImporter country_importer;
 
@@ -168,7 +171,7 @@ TEST(Vic3WorldCountriesCountryImporter, CivilWarDetected)
    EXPECT_TRUE(country_one.value_or(Country({})).IsCivilWarCountry());
 }
 
-TEST(Vic3WorldCountriesCountryImporter, ActiveLawsCanBeSet)
+TEST(Vic3WorldCountriesCountryImporter, ActiveLawsCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    Country country({});
    country.SetActiveLaws({"test_law_one", "test_law_two"});
@@ -177,7 +180,7 @@ TEST(Vic3WorldCountriesCountryImporter, ActiveLawsCanBeSet)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, LastElectionCanBeSet)
+TEST(Vic3WorldCountriesCountryImporter, LastElectionCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    Country country({});
    country.SetLastElection(date{"1929.9.9"});
@@ -187,7 +190,7 @@ TEST(Vic3WorldCountriesCountryImporter, LastElectionCanBeSet)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, CharacterIdsCanBeSet)
+TEST(Vic3WorldCountriesCountryImporter, CharacterIdsCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    Country country({});
    country.SetCharacterIds({1, 2, 3});
@@ -196,7 +199,7 @@ TEST(Vic3WorldCountriesCountryImporter, CharacterIdsCanBeSet)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, IgIdsCanBeAdded)
+TEST(Vic3WorldCountriesCountryImporter, IgIdsCanBeAdded)  // NOLINT(cert-err58-cpp)
 {
    Country country({});
    country.AddInterestGroupId(1);
@@ -207,7 +210,7 @@ TEST(Vic3WorldCountriesCountryImporter, IgIdsCanBeAdded)
 }
 
 
-TEST(Vic3WorldCountriesCountryImporter, DeadCountriesAreImported)
+TEST(Vic3WorldCountriesCountryImporter, DeadCountriesAreImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -221,7 +224,7 @@ TEST(Vic3WorldCountriesCountryImporter, DeadCountriesAreImported)
    EXPECT_TRUE(country.value_or(Country({})).IsDead());
 }
 
-TEST(Vic3WorldCountriesCountryImporter, CountersSectionParsed)
+TEST(Vic3WorldCountriesCountryImporter, CountersSectionParsed)  // NOLINT(cert-err58-cpp)
 {
    CountryImporter country_importer;
 

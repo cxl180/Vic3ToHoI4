@@ -1,6 +1,7 @@
 #include <external/commonItems/external/googletest/googlemock/include/gmock/gmock-matchers.h>
 #include <external/commonItems/external/googletest/googletest/include/gtest/gtest.h>
 #include <external/fmt/include/fmt/format.h>
+#include <external/fmt/include/fmt/ranges.h>
 
 #include <ostream>
 #include <sstream>
@@ -23,78 +24,7 @@
 namespace hoi4
 {
 
-// functions to allow test comparators to provide readable results
-void PrintTo(const State& state, std::ostream* os)
-{
-   *os << "{\n";
-   *os << fmt::format("\tid = {}\n", state.GetId());
-   if (const auto& owner = state.GetOwner(); owner)
-   {
-      *os << fmt::format("\towner = {}\n", *owner);
-   }
-   *os << "\tprovinces {\n";
-   for (const int province: state.GetProvinces())
-   {
-      *os << fmt::format("\t\t{}\n", province);
-   }
-   *os << "\t}\n";
-   if (const int manpower = state.GetManpower(); manpower != 0)
-   {
-      *os << fmt::format("\tmanpower = {}\n", manpower);
-   }
-   if (const auto& resources = state.GetResources(); !resources.empty())
-   {
-      *os << "\tresources {\n";
-      for (const auto& [resource, amount]: resources)
-      {
-         *os << fmt::format("\t\t{}: {}\n", resource, amount);
-      }
-      *os << "\t}\n";
-   }
-   *os << fmt::format("\tcategory = {}\n", state.GetCategory());
-   *os << "\tvictory points {\n";
-   for (const auto& [province, amount]: state.GetVictoryPoints())
-   {
-      *os << fmt::format("\t\t{} {}\n", province, amount);
-   }
-   *os << "\t}\n";
-   if (const int civilian_factories = state.GetCivilianFactories(); civilian_factories != 0)
-   {
-      *os << fmt::format("\tcivilian factories = {}\n", civilian_factories);
-   }
-   if (const int military_factories = state.GetMilitaryFactories(); military_factories != 0)
-   {
-      *os << fmt::format("\tmilitary factories = {}\n", military_factories);
-   }
-   if (const int dockyards = state.GetDockyards(); dockyards != 0)
-   {
-      *os << fmt::format("\tdockyards = {}\n", dockyards);
-   }
-   if (const auto& naval_base_location = state.GetNavalBaseLocation(); naval_base_location)
-   {
-      *os << fmt::format("\tnaval base location = {}\n", *naval_base_location);
-   }
-   if (const auto& naval_base_level = state.GetNavalBaseLevel(); naval_base_level)
-   {
-      *os << fmt::format("\tnaval base level = {}\n", *naval_base_level);
-   }
-   *os << fmt::format("\tair base level = {}\n", state.GetAirBaseLevel());
-   if (const auto& cores = state.GetCores(); !cores.empty())
-   {
-      *os << "\tcores {\n";
-      for (const auto& core: cores)
-      {
-         *os << fmt::format("\t\t{}\n", core);
-      }
-      *os << "\t}\n";
-   }
-   *os << fmt::format("\tvic3 infrastructure = {}\n", state.GetVic3Infrastructure());
-   *os << fmt::format("\tinfrastructure = {}\n", state.GetInfrastructure());
-   *os << "}";
-}
-
-
-TEST(Hoi4worldStatesHoi4statesconverter, ManpowerIsConverted)
+TEST(Hoi4worldStatesHoi4statesconverter, ManpowerIsConverted)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld().AddStates({
        {1, vic3::State({.provinces = {1, 2, 3}, .population = 12345})},
@@ -122,7 +52,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ManpowerIsConverted)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, ManpowerInSplitStatesIsProportionalToTotalProvinces)
+TEST(Hoi4worldStatesHoi4statesconverter, ManpowerInSplitStatesIsProportionalToTotalProvinces)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld().AddStates({
        {1, vic3::State({.provinces = {1, 2, 3}, .population = 12345})},
@@ -150,6 +80,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ManpowerInSplitStatesIsProportionalToTo
            State(4, {.provinces = {60}, .manpower = 22'630})));
 }
 
+// NOLINTNEXTLINE(cert-err58-cpp)
 TEST(Hoi4worldStatesHoi4statesconverter, ManpowerInWastelandStatesIsProportionalToTotalProvinces)
 {
    vic3::WorldBuilder world =
@@ -186,7 +117,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ManpowerInWastelandStatesIsProportional
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, ManpowerIsLogged)
+TEST(Hoi4worldStatesHoi4statesconverter, ManpowerIsLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
    std::streambuf* cout_buffer = std::cout.rdbuf();
@@ -222,7 +153,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ManpowerIsLogged)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsConverted)
+TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsConverted)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddStates({{1, vic3::State({.owner_number = 1, .provinces = {1, 2, 3}})},
@@ -260,7 +191,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsConverted)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, DockyardsAreConvertedInCoastalStates)
+TEST(Hoi4worldStatesHoi4statesconverter, DockyardsAreConvertedInCoastalStates)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddStates({
@@ -301,7 +232,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, DockyardsAreConvertedInCoastalStates)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsLogged)
+TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream log;
    std::streambuf* cout_buffer = std::cout.rdbuf();
@@ -345,7 +276,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsLogged)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsNotConvertedInUnownedStates)
+TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsNotConvertedInUnownedStates)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world =
        vic3::WorldBuilder::CreateNullWorld()
@@ -375,7 +306,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsNotConvertedInUnownedStates)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsCappedAtTwelve)
+TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsCappedAtTwelve)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}})
@@ -407,7 +338,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, IndustryIsCappedAtTwelve)
                .air_base_level = 3})));
 }
 
-TEST(Hoi4worldStatesHoi4statesconverter, StatesAreSortedByIndustry)
+TEST(Hoi4worldStatesHoi4statesconverter, StatesAreSortedByIndustry)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world =
        vic3::WorldBuilder::CreateNullWorld()
@@ -453,6 +384,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, StatesAreSortedByIndustry)
 }
 
 
+// NOLINTNEXTLINE(cert-err58-cpp)
 TEST(Hoi4worldStatesHoi4statesconverter, UnconvertedIndustryIsConvertedInNextStateOfSameOwner)
 {
    vic3::WorldBuilder world =
@@ -502,7 +434,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, UnconvertedIndustryIsConvertedInNextSta
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, IndustryInSplitStatesIsProportionalToTotalProvinces)
+TEST(Hoi4worldStatesHoi4statesconverter, IndustryInSplitStatesIsProportionalToTotalProvinces)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -551,7 +483,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, IndustryInSplitStatesIsProportionalToTo
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, IndustryInWastelandSplitStatesIsZero)
+TEST(Hoi4worldStatesHoi4statesconverter, IndustryInWastelandSplitStatesIsZero)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -595,7 +527,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, IndustryInWastelandSplitStatesIsZero)
            State(4, {.owner = "TWO", .provinces = {40, 50}, .category = "wasteland", .air_base_level = 0})));
 }
 
-TEST(Hoi4worldStatesHoi4statesconverter, NavalBaseDefaultsToZero)
+TEST(Hoi4worldStatesHoi4statesconverter, NavalBaseDefaultsToZero)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}})
@@ -628,7 +560,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, NavalBaseDefaultsToZero)
                .naval_base_location = std::nullopt,
                .naval_base_level = std::nullopt})));
 }
-TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesAreConvertedInCoastalStates)
+TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesAreConvertedInCoastalStates)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -637,8 +569,18 @@ TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesAreConvertedInCoastalStates)
                                       {"REGION_ONE", vic3::StateRegion({{"x000002", "port"}}, {})},
                                       {"REGION_TWO", vic3::StateRegion({{"x000005", "port"}}, {})},
                                   })
-                                  .AddBuildings({vic3::Building(vic3::BuildingType::NavalBase, 1, 0.0F, 9.0F, {}),
-                                      vic3::Building(vic3::BuildingType::NavalBase, 2, 0.0F, 10.0F, {})});
+                                  .AddBuildings({
+                                      vic3::Building(vic3::kBuildingTypeNavalBase,
+                                          1,
+                                          vic3::GoodsSalesValue{0.0F},
+                                          vic3::StaffingLevel{9.0F},
+                                          {}),
+                                      vic3::Building(vic3::kBuildingTypeNavalAdministration,
+                                          2,
+                                          vic3::GoodsSalesValue{0.0F},
+                                          vic3::StaffingLevel{10.0F},
+                                          {}),
+                                  });
    mappers::WorldMapperBuilder world_mapper = std::move(
        mappers::WorldMapperBuilder::CreateNullMapper().AddTestProvinces(6).AddCountries({{1, "ONE"}, {2, "TWO"}}));
    world_mapper.CopyToVicWorld(world);
@@ -670,7 +612,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesAreConvertedInCoastalStates)
                    .naval_base_level = 2})));
 }
 
-TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesPrioritisePorts)
+TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesPrioritisePorts)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -679,8 +621,18 @@ TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesPrioritisePorts)
                                       {"REGION_ONE", vic3::StateRegion({{"x000002", "farm"}, {"x000001", "port"}}, {})},
                                       {"REGION_TWO", vic3::StateRegion({{"x000005", "mine"}, {"x000004", "city"}}, {})},
                                   })
-                                  .AddBuildings({vic3::Building(vic3::BuildingType::NavalBase, 1, 0.0F, 9.0F, {}),
-                                      vic3::Building(vic3::BuildingType::NavalBase, 2, 0.0F, 10.0F, {})});
+                                  .AddBuildings({
+                                      vic3::Building(vic3::kBuildingTypeNavalBase,
+                                          1,
+                                          vic3::GoodsSalesValue{0.0F},
+                                          vic3::StaffingLevel{9.0F},
+                                          {}),
+                                      vic3::Building(vic3::kBuildingTypeNavalBase,
+                                          2,
+                                          vic3::GoodsSalesValue{0.0F},
+                                          vic3::StaffingLevel{10.0F},
+                                          {}),
+                                  });
    mappers::WorldMapperBuilder world_mapper = std::move(
        mappers::WorldMapperBuilder::CreateNullMapper().AddTestProvinces(6).AddCountries({{1, "ONE"}, {2, "TWO"}}));
    world_mapper.CopyToVicWorld(world);
@@ -714,7 +666,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, NavalBasesPrioritisePorts)
                    .naval_base_level = 2})));
 }
 
-TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelDefaultsToZero)
+TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelDefaultsToZero)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world =
        vic3::WorldBuilder::CreateNullWorld()
@@ -740,7 +692,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelDefaultsToZero)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelIncreasesFromIndustry)
+TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelIncreasesFromIndustry)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddStates({{1, vic3::State({.owner_number = 1, .provinces = {1, 2, 3}})},
@@ -777,7 +729,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelIncreasesFromIndustry)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelIncreasesFromInfrastructure)
+TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelIncreasesFromInfrastructure)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world =
        vic3::WorldBuilder::CreateNullWorld()
@@ -814,7 +766,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, AirBaseLevelIncreasesFromInfrastructure
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, ResourcesDefaultToEmpty)
+TEST(Hoi4worldStatesHoi4statesconverter, ResourcesDefaultToEmpty)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world =
        vic3::WorldBuilder::CreateNullWorld()
@@ -841,7 +793,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ResourcesDefaultToEmpty)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreAssigned)
+TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreAssigned)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -888,7 +840,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreAssigned)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreCalculated)
+TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreCalculated)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -924,7 +876,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreCalculated)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreLogged)
+TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreLogged)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -977,7 +929,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, ResourcesAreLogged)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, CategoryDefaultsToRural)
+TEST(Hoi4worldStatesHoi4statesconverter, CategoryDefaultsToRural)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -1003,7 +955,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, CategoryDefaultsToRural)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, CategoriesAreSet)
+TEST(Hoi4worldStatesHoi4statesconverter, CategoriesAreSet)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -1048,7 +1000,82 @@ TEST(Hoi4worldStatesHoi4statesconverter, CategoriesAreSet)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsDefaultToEmpty)
+TEST(Hoi4worldStatesHoi4statesconverter, ContinentDefaultsToNullopt)  // NOLINT(cert-err58-cpp)
+{
+   vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
+                                  .AddTestStates({{1, 2, 3}, {4, 5, 6}})
+                                  .AddTestStateRegions({{1, 2, 3}, {4, 5, 6}});
+   mappers::WorldMapperBuilder world_mapper =
+       std::move(mappers::WorldMapperBuilder::CreateNullMapper().AddTestProvinces(6));
+   world_mapper.CopyToVicWorld(world);
+   hoi4::WorldFrameworkBuilder world_framework =
+       WorldFrameworkBuilder::CreateNullWorldFramework().AddTestLandProvinces(6);
+   const maps::MapData map_data({
+       .province_neighbors =
+           {
+               {"10", {"20", "30"}},
+               {"40", {"50", "60"}},
+           },
+       .province_definitions = world_framework.CopyProvinceDefinitions(),
+   });
+   const auto hoi4_states = ConvertStates(world.Build(), world_mapper.Build(), world_framework.Build(), {}, map_data);
+
+   EXPECT_THAT(hoi4_states.states,
+       testing::ElementsAre(State(1, {.provinces = {10, 20, 30}, .continent = std::nullopt}),
+           State(2, {.provinces = {40, 50, 60}, .continent = std::nullopt})));
+}
+
+
+TEST(Hoi4worldStatesHoi4statesconverter, ContinentsAreSet)  // NOLINT(cert-err58-cpp)
+{
+   vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
+                                  .AddTestStates({{1, 2, 3}, {4, 5, 6}})
+                                  .AddTestStateRegions({{1, 2, 3}, {4, 5, 6}});
+   mappers::WorldMapperBuilder world_mapper = std::move(
+       mappers::WorldMapperBuilder::CreateNullMapper().AddTestProvinces(6).AddCountries({{1, "ONE"}, {2, "TWO"}}));
+   world_mapper.CopyToVicWorld(world);
+   hoi4::WorldFrameworkBuilder world_framework = WorldFrameworkBuilder::CreateNullWorldFramework()
+                                                     .AddTestLandProvinces(6)
+                                                     .AddProvinceContinents({"10", "20", "30"}, "continent_one")
+                                                     .AddProvinceContinents({"40", "50", "60"}, "continent_two");
+   const maps::MapData map_data({
+       .province_neighbors =
+           {
+               {"10", {"20", "30"}},
+               {"40", {"50", "60"}},
+           },
+       .province_definitions = world_framework.CopyProvinceDefinitions(),
+   });
+   const auto hoi4_states = ConvertStates(world.Build(), world_mapper.Build(), world_framework.Build(), {}, map_data);
+
+   std::cout << fmt::format("State {}, owned by {}, with provinces {}, on continent {}\n",
+       hoi4_states.states[0].GetId(),
+       hoi4_states.states[0].GetOwner().value_or(""),
+       fmt::join(hoi4_states.states[0].GetProvinces().begin(), hoi4_states.states[0].GetProvinces().end(), ", "),
+       hoi4_states.states[0].GetContinent().value_or(""));
+   std::cout << fmt::format("State {}, owned by {}, with provinces {}, on continent {}\n",
+       hoi4_states.states[1].GetId(),
+       hoi4_states.states[1].GetOwner().value_or(""),
+       fmt::join(hoi4_states.states[1].GetProvinces().begin(), hoi4_states.states[1].GetProvinces().end(), ", "),
+       hoi4_states.states[1].GetContinent().value_or(""));
+
+   EXPECT_THAT(hoi4_states.states,
+       testing::ElementsAre(State(1,
+                                {
+                                    .owner = "ONE",
+                                    .provinces = {10, 20, 30},
+                                    .continent = "continent_one",
+                                }),
+           State(2,
+               {
+                   .owner = "TWO",
+                   .provinces = {40, 50, 60},
+                   .continent = "continent_two",
+               })));
+}
+
+
+TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsDefaultToEmpty)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -1074,6 +1101,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsDefaultToEmpty)
 }
 
 
+// NOLINTNEXTLINE(cert-err58-cpp)
 TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsArePlacedInHighestValueSignificantProvinces)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
@@ -1111,7 +1139,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsArePlacedInHighestValueSig
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsAreValuedAtHalfTotalFactoriesRoundedUp)
+TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsAreValuedAtHalfTotalFactoriesRoundedUp)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddTestStates({{1, 2, 3}, {4, 5, 6}})
@@ -1161,7 +1189,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, VictoryPointsAreValuedAtHalfTotalFactor
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, DebugVictoryPointsAreConverted)
+TEST(Hoi4worldStatesHoi4statesconverter, DebugVictoryPointsAreConverted)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world = vic3::WorldBuilder::CreateNullWorld()
                                   .AddStates({
@@ -1198,7 +1226,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, DebugVictoryPointsAreConverted)
        world_framework.Build(),
        {},
        map_data,
-       configuration::debugConfig);
+       configuration::kDebugConfig);
 
    EXPECT_THAT(hoi4_states.states,
        testing::ElementsAre(State(1, {.provinces = {10, 20, 30}, .victory_points = {{10, 1}, {20, 2}, {30, 3}}}),
@@ -1206,7 +1234,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, DebugVictoryPointsAreConverted)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, OwnerGetsCoreOnIncorporatedStates)
+TEST(Hoi4worldStatesHoi4statesconverter, OwnerGetsCoreOnIncorporatedStates)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world =
        vic3::WorldBuilder::CreateNullWorld()
@@ -1236,7 +1264,7 @@ TEST(Hoi4worldStatesHoi4statesconverter, OwnerGetsCoreOnIncorporatedStates)
 }
 
 
-TEST(Hoi4worldStatesHoi4statesconverter, InfrastructureIsTransferredFromVic3State)
+TEST(Hoi4worldStatesHoi4statesconverter, InfrastructureIsTransferredFromVic3State)  // NOLINT(cert-err58-cpp)
 {
    vic3::WorldBuilder world =
        vic3::WorldBuilder::CreateNullWorld()

@@ -26,11 +26,13 @@ std::map<std::string, int> DetermineProvinceOrdering(const commonItems::ModFiles
    int width = 0;
    int height = 0;
    int depth = 0;
-   unsigned char* data = stbi_load(filesystem.GetActualFileLocation("map_data/provinces.png")->string().c_str(),
-       &width,
-       &height,
-       &depth,
-       0);
+
+   const std::optional<path> possible_path = filesystem.GetActualFileLocation("map_data/provinces.png");
+   if (possible_path == std::nullopt)
+   {
+      throw std::runtime_error("Could not find map_data/provinces.png");
+   }
+   unsigned char* data = stbi_load(possible_path.value_or(path{}).string().c_str(), &width, &height, &depth, 0);
    if (data == nullptr)
    {
       throw std::runtime_error("Could not load map_data/provinces.png");
@@ -38,25 +40,25 @@ std::map<std::string, int> DetermineProvinceOrdering(const commonItems::ModFiles
 
    std::map<std::string, int> province_indexes;
    std::unordered_set<std::string> found_provinces;
-   uint8_t last_r = 0;
-   uint8_t last_g = 0;
-   uint8_t last_b = 0;
+   uint8_t last_red = 0;
+   uint8_t last_green = 0;
+   uint8_t last_blue = 0;
    for (int y = height - 1; y >= 0; --y)
    {
       for (int x = 0; x < width; ++x)
       {
-         const int pixel = y * width + x;
-         const uint8_t r = data[pixel * depth + 0];
-         const uint8_t g = data[pixel * depth + 1];
-         const uint8_t b = data[pixel * depth + 2];
-         if (r == last_r && g == last_g && b == last_b)
+         const int pixel = (y * width) + x;
+         const uint8_t red = data[(pixel * depth) + 0];
+         const uint8_t green = data[(pixel * depth) + 1];
+         const uint8_t blue = data[(pixel * depth) + 2];
+         if (red == last_red && green == last_green && blue == last_blue)
          {
             continue;
          }
-         const std::string province = fmt::format("x{:0>2X}{:0>2X}{:0>2X}", r, g, b);
-         last_r = r;
-         last_g = g;
-         last_b = b;
+         const std::string province = fmt::format("x{:0>2X}{:0>2X}{:0>2X}", red, green, blue);
+         last_red = red;
+         last_green = green;
+         last_blue = blue;
          if (auto [_, success] = found_provinces.insert(province); success)
          {
             // successful insertion means this is the first we saw this province's color

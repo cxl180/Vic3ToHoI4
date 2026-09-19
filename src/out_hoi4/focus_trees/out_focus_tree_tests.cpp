@@ -18,21 +18,21 @@ using std::filesystem::create_directories;
 namespace out
 {
 
-TEST(Outhoi4FocustreesOurfocustreeTests, NationalFocusFileIsNamedForTag)
+TEST(Outhoi4FocustreesOurfocustreeTests, NationalFocusFileIsNamedForTag)  // NOLINT(cert-err58-cpp)
 {
    create_directories("output/NationalFocusFileIsNamedForTag/common/national_focus");
 
-   OutputFocusTree("NationalFocusFileIsNamedForTag", "TST", {}, configuration::UseStories::kNo);
+   OutputFocusTree("NationalFocusFileIsNamedForTag", "TST", {});
 
    EXPECT_TRUE(commonItems::DoesFileExist("output/NationalFocusFileIsNamedForTag/common/national_focus/TST_NF.txt"));
 }
 
 
-TEST(Outhoi4FocustreesOurfocustreeTests, DefaultsAreOutput)
+TEST(Outhoi4FocustreesOurfocustreeTests, DefaultsAreOutput)  // NOLINT(cert-err58-cpp)
 {
    create_directories("output/DefaultsAreOutput/common/national_focus");
 
-   OutputFocusTree("DefaultsAreOutput", "TST", {}, configuration::UseStories::kNo);
+   OutputFocusTree("DefaultsAreOutput", "TST", {});
 
    ASSERT_TRUE(commonItems::DoesFileExist("output/DefaultsAreOutput/common/national_focus/TST_NF.txt"));
    std::ifstream national_focus_file("output/DefaultsAreOutput/common/national_focus/TST_NF.txt");
@@ -65,14 +65,11 @@ TEST(Outhoi4FocustreesOurfocustreeTests, DefaultsAreOutput)
 }
 
 
-TEST(Outhoi4FocustreesOurfocustreeTests, SharedFocusesAreOutput)
+TEST(Outhoi4FocustreesOurfocustreeTests, SharedFocusesAreOutput)  // NOLINT(cert-err58-cpp)
 {
    create_directories("output/SharedFocusesAreOutput/common/national_focus");
 
-   OutputFocusTree("SharedFocusesAreOutput",
-       "TST",
-       {.shared_focuses = {"shared_focus_one", "shared_focus_two"}},
-       configuration::UseStories::kNo);
+   OutputFocusTree("SharedFocusesAreOutput", "TST", {.shared_focuses = {"shared_focus_one", "shared_focus_two"}});
 
    ASSERT_TRUE(commonItems::DoesFileExist("output/SharedFocusesAreOutput/common/national_focus/TST_NF.txt"));
    std::ifstream national_focus_file("output/SharedFocusesAreOutput/common/national_focus/TST_NF.txt");
@@ -107,14 +104,11 @@ TEST(Outhoi4FocustreesOurfocustreeTests, SharedFocusesAreOutput)
 }
 
 
-TEST(Outhoi4FocustreesOurfocustreeTests, FocusesAreOutput)
+TEST(Outhoi4FocustreesOurfocustreeTests, FocusesAreOutput)  // NOLINT(cert-err58-cpp)
 {
    create_directories("output/FocusesAreOutput/common/national_focus");
 
-   OutputFocusTree("FocusesAreOutput",
-       "TST",
-       {.focuses = {{.id = "focus_one"}, {.id = "focus_two"}}},
-       configuration::UseStories::kYes);
+   OutputFocusTree("FocusesAreOutput", "TST", {.focuses = {{.id = "focus_one"}, {.id = "focus_two"}}});
 
    ASSERT_TRUE(commonItems::DoesFileExist("output/FocusesAreOutput/common/national_focus/TST_NF.txt"));
    std::ifstream national_focus_file("output/FocusesAreOutput/common/national_focus/TST_NF.txt");
@@ -157,46 +151,6 @@ TEST(Outhoi4FocustreesOurfocustreeTests, FocusesAreOutput)
    expected << "\t\tcost = 0\n";
    expected << "\t\tcompletion_reward \n";
    expected << "\t}\n";
-   expected << "\n";
-   expected << "}\n";
-   EXPECT_EQ(national_focus_file_stream.str(), expected.str());
-}
-
-
-TEST(Outhoi4FocustreesOurfocustreeTests, FocusesArentOutputIfNotUsingStoriesSystem)
-{
-   create_directories("output/FocusesAreOutput/common/national_focus");
-
-   OutputFocusTree("FocusesAreOutput",
-       "TST",
-       {.focuses = {{.id = "focus_one"}, {.id = "focus_two"}}},
-       configuration::UseStories::kNo);
-
-   ASSERT_TRUE(commonItems::DoesFileExist("output/FocusesAreOutput/common/national_focus/TST_NF.txt"));
-   std::ifstream national_focus_file("output/FocusesAreOutput/common/national_focus/TST_NF.txt");
-   ASSERT_TRUE(national_focus_file.is_open());
-   std::stringstream national_focus_file_stream;
-   std::copy(std::istreambuf_iterator<char>(national_focus_file),
-       std::istreambuf_iterator<char>(),
-       std::ostreambuf_iterator<char>(national_focus_file_stream));
-   national_focus_file.close();
-
-   std::stringstream expected;
-   expected << "focus_tree = {\n";
-   expected << "\tid = TST_focus\n";
-   expected << "\t\n";
-   expected << "\tcountry = {\n";
-   expected << "\t\tfactor = 0\n";
-   expected << "\t\t\n";
-   expected << "\t\tmodifier = {\n";
-   expected << "\t\t\tadd = 10\n";
-   expected << "\t\t\ttag = TST\n";
-   expected << "\t\t}\n";
-   expected << "\t}\n";
-   expected << "\t\n";
-   expected << "\tdefault = no\n";
-   expected << "\treset_on_civilwar = no\n";
-   expected << "\n";
    expected << "\n";
    expected << "}\n";
    EXPECT_EQ(national_focus_file_stream.str(), expected.str());

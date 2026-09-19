@@ -11,8 +11,8 @@ Documentation: https://hoi4.paradoxwikis.com/Victoria_3_to_Hearts_of_Iron_IV_con
 ----
 SUPPORTED VERSIONS
 ----
-Hoi4 - 1.15
-Vic3 - 1.8
+Hoi4 - 1.19
+Vic3 - 1.13
 
 
 ----
@@ -30,20 +30,21 @@ CREDITS
 
 An (incomplete) list of those who contributed effort to this mammoth undertaking
 
-Idhrendur			- Project Lead, Programming, Analysis
-Zemurin				- Programming, Code reviews, Tools
-IhateTrains			- Programming, Code reviews, Tools
-Drasilabyss			- Programming
-Ultrapotassium		- Programming
-Bratmon				- Programming
+Idhrendur           - Project Lead, Programming, Analysis
+Zemurin             - Programming, Code reviews, Tools
+IhateTrains         - Programming, Code reviews, Tools
+Drasilabyss         - Programming
+Ultrapotassium      - Programming
+Bratmon             - Programming
 shadowofneptune     - Programming
 Cocopioche          - Programming
-cetvrtak			- Data Files
-DaJay42				- Data Files
-gawquon				- Data Files
-klorpa				- Data Files
-Limabot				- Data Files
-Anate				- Translations
+cetvrtak            - Data Files
+DaJay42             - Data Files
+gawquon             - Data Files
+klorpa              - Data Files
+Limabot             - Data Files
+Fresan              - Data Files
+Anate               - Translations
 
 Special thanks to LukyLucaz, who allowed us to incorporate Increased Resources into the converter.
 

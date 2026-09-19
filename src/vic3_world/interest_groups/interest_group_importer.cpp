@@ -8,7 +8,7 @@
 vic3::InterestGroupImporter::InterestGroupImporter()
 {
    ig_parser_.registerKeyword("country", [this](std::istream& input_stream) {
-      country_id_ = commonItems::getInt(input_stream);
+      country_id_ = static_cast<int>(commonItems::getULlong(input_stream));
    });
    ig_parser_.registerKeyword("definition", [this](std::istream& input_stream) {
       type_ = commonItems::getString(input_stream);
@@ -40,5 +40,10 @@ vic3::InterestGroup vic3::InterestGroupImporter::ImportInterestGroup(std::istrea
 
    ig_parser_.parseStream(input_stream);
 
-   return {type_, country_id_, leader_, clout_, in_government_, ideologies_};
+   return {type_,
+       InterestGroupCountryId{country_id_},
+       InterestGroupLeader{leader_},
+       InterestGroupClout{clout_},
+       InterestGroupInGovernment{in_government_},
+       ideologies_};
 }

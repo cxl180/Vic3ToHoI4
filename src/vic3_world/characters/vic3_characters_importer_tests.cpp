@@ -9,7 +9,7 @@ namespace vic3
 {
 
 
-TEST(Vic3WorldCharactersVic3CharactersImporter, NoCharactersOnEmptyInput)
+TEST(Vic3WorldCharactersVic3CharactersImporter, NoCharactersOnEmptyInput)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const std::map<int, vic3::Character> characters = ImportCharacters(input);
@@ -18,7 +18,7 @@ TEST(Vic3WorldCharactersVic3CharactersImporter, NoCharactersOnEmptyInput)
 }
 
 
-TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersCanBeImported)
+TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -26,6 +26,8 @@ TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersCanBeImported)
    input << "\tfirst_name = \"Cabdi\"\n";
    input << "\tlast_name = \"Wala\"\n";
    input << "\tculture = 1\n";
+   input << "\tcountry = 3\n";
+   input << "\tinterest_group = 7\n";
    input << "\trole = politician\n";
    input << "\trole = agitator\n";
    input << "\tideology = \"ideology_0\"\n";
@@ -37,6 +39,8 @@ TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersCanBeImported)
    input << "\tfirst_name = \"Hswe\"\n";
    input << "\tlast_name = \"Hmu\"\n";
    input << "\tculture = 2\n";
+   input << "\tcountry = 4\n";
+   input << "\tinterest_group = 6\n";
    input << "\trole = general\n";
    input << "\tideology = \"ideology_1\"\n";
    input << "\trank = commander_rank_2\n";
@@ -48,27 +52,35 @@ TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersCanBeImported)
 
    EXPECT_THAT(characters,
        testing::UnorderedElementsAre(testing::Pair(0,
-                                         Character({.id = 0,
+                                         Character({
+                                             .id = 0,
                                              .first_name = "Cabdi",
                                              .last_name = "Wala",
                                              .culture_id = 1,
+                                             .ig_id = 7,
                                              .roles = {"politician", "agitator"},
                                              .rank = 5,
                                              .ideology = "ideology_0",
-                                             .traits = {"trait_0", "trait_1"}})),
+                                             .traits = {"trait_0", "trait_1"},
+                                             .origin_country_id = 3,
+                                         })),
            testing::Pair(2,
-               Character({.id = 2,
+               Character({
+                   .id = 2,
                    .first_name = "Hswe",
                    .last_name = "Hmu",
                    .culture_id = 2,
+                   .ig_id = 6,
                    .roles = {"general"},
                    .rank = 2,
                    .ideology = "ideology_1",
-                   .traits = {"trait_2", "trait_3"}}))));
+                   .traits = {"trait_2", "trait_3"},
+                   .origin_country_id = 4,
+               }))));
 }
 
 
-TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersSetAsNoneAreSkipped)
+TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersSetAsNoneAreSkipped)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -84,7 +96,7 @@ TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersSetAsNoneAreSkipped)
 }
 
 
-TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersImportsAreLogged)
+TEST(Vic3WorldCharactersVic3CharactersImporter, CharactersImportsAreLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";

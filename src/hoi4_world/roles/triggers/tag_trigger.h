@@ -28,7 +28,12 @@ class TagTrigger: public Trigger
    [[nodiscard]] bool operator<(const TagTrigger& rhs) const { return tag_ < rhs.tag_; }
 
    [[nodiscard]] std::unique_ptr<Trigger> Copy() const override;
-   [[nodiscard]] bool IsValid(const Scope& scope, const World& world) const override;
+   [[nodiscard]] bool IsValid(const Context& context, const World& world) const override;
+   [[nodiscard]] std::vector<Scope> FindAllValid([[maybe_unused]] const Context& context,
+       [[maybe_unused]] const World& world) const override
+   {
+      return {};
+   }
 
    // This allows the Google test framework to print human-readable RepeatFocuses if a test fails.
    friend void PrintTo(const TagTrigger& trigger, std::ostream* os);

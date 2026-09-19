@@ -25,7 +25,7 @@ struct GraphicsBlock
    std::string graphical_culture_2d;
 
    std::partial_ordering operator<=>(const GraphicsBlock&) const = default;
-   friend void PrintTo(const GraphicsBlock& country, std::ostream* os);
+   friend void PrintTo(const GraphicsBlock& block, std::ostream* os);
 };
 
 
@@ -33,6 +33,7 @@ struct CultureGraphicsMapping
 {
    std::set<std::string> cultures;
    std::set<std::string> traits;
+   std::set<std::string> heritages;
    std::set<std::string> ethnicities;
 
    GraphicsBlock graphics_block;

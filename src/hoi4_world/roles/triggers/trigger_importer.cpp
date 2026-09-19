@@ -2,8 +2,24 @@
 
 #include "src/hoi4_world/roles/triggers/always_trigger.h"
 #include "src/hoi4_world/roles/triggers/and_trigger.h"
+#include "src/hoi4_world/roles/triggers/any_other_country_trigger.h"
+#include "src/hoi4_world/roles/triggers/any_owned_state_trigger.h"
+#include "src/hoi4_world/roles/triggers/any_primary_culture_trigger.h"
+#include "src/hoi4_world/roles/triggers/any_scope_state_trigger.h"
+#include "src/hoi4_world/roles/triggers/any_state_trigger.h"
+#include "src/hoi4_world/roles/triggers/country_has_primary_culture_trigger.h"
+#include "src/hoi4_world/roles/triggers/has_role_trigger.h"
+#include "src/hoi4_world/roles/triggers/is_capital_trigger.h"
+#include "src/hoi4_world/roles/triggers/is_homeland_of_country_cultures.h"
+#include "src/hoi4_world/roles/triggers/is_homeland_trigger.h"
+#include "src/hoi4_world/roles/triggers/is_on_continent_trigger.h"
+#include "src/hoi4_world/roles/triggers/nand_trigger.h"
+#include "src/hoi4_world/roles/triggers/nor_trigger.h"
 #include "src/hoi4_world/roles/triggers/not_trigger.h"
 #include "src/hoi4_world/roles/triggers/or_trigger.h"
+#include "src/hoi4_world/roles/triggers/owner_trigger.h"
+#include "src/hoi4_world/roles/triggers/root_trigger.h"
+#include "src/hoi4_world/roles/triggers/shares_heritage_trait_with_culture_trigger.h"
 #include "src/hoi4_world/roles/triggers/tag_trigger.h"
 
 
@@ -13,30 +29,167 @@ namespace hoi4
 
 TriggerImporter::TriggerImporter()
 {
-   trigger_parser_.registerKeyword("always", [this](std::istream& input) {
-      const std::optional<std::string> equals = trigger_parser_.getNextTokenWithoutMatching(input);
-      const std::optional<std::string> value_string = trigger_parser_.getNextTokenWithoutMatching(input);
-      const bool value = value_string.value_or("no") == "yes";
-      triggers_.push_back(std::make_unique<AlwaysTrigger>(value));
+   // trigger scopes
+   trigger_parser_.registerKeyword("any_other_country", [this]([[maybe_unused]] std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<AnyOtherCountryTrigger>(std::move(triggers)));
    });
-   trigger_parser_.registerKeyword("tag", [this](std::istream& input) {
-      const std::optional<std::string> equals = trigger_parser_.getNextTokenWithoutMatching(input);
-      if (const std::optional<std::string> tag_string = trigger_parser_.getNextTokenWithoutMatching(input); tag_string)
-      {
-         triggers_.push_back(std::make_unique<TagTrigger>(tag_string.value()));
-      }
+   trigger_parser_.registerKeyword("any_owned_state", [this]([[maybe_unused]] std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<AnyOwnedStateTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("any_scope_state", [this]([[maybe_unused]] std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<AnyScopeStateTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("any_state", [this]([[maybe_unused]] std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<AnyStateTrigger>(std::move(triggers)));
+   });
+
+
+   // flow control tools
+   trigger_parser_.registerKeyword("all_false", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<NorTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("any_false", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<NandTrigger>(std::move(triggers)));
    });
    trigger_parser_.registerKeyword("AND", [this](std::istream& input) {
       std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
       triggers_.push_back(std::make_unique<AndTrigger>(std::move(triggers)));
    });
-   trigger_parser_.registerKeyword("OR", [this](std::istream& input) {
+   trigger_parser_.registerKeyword("and", [this](std::istream& input) {
       std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
-      triggers_.push_back(std::make_unique<OrTrigger>(std::move(triggers)));
+      triggers_.push_back(std::make_unique<AndTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("NAND", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<NandTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("nand", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<NandTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("NOR", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<NorTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("nor", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<NorTrigger>(std::move(triggers)));
    });
    trigger_parser_.registerKeyword("NOT", [this](std::istream& input) {
       std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
       triggers_.push_back(std::make_unique<NotTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("not", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<NotTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("OR", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<OrTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("or", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<OrTrigger>(std::move(triggers)));
+   });
+
+
+   // any scopes
+   trigger_parser_.registerKeyword("always", [this](std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      std::string value_string = commonItems::parser::getNextTokenWithoutMatching(input).value_or("no");
+#pragma warning(push)
+#pragma warning(disable : 4242)
+      std::ranges::transform(value_string, value_string.begin(), ::tolower);
+#pragma warning(push)
+      const bool value = value_string == "yes";
+      triggers_.push_back(std::make_unique<AlwaysTrigger>(value));
+   });
+   trigger_parser_.registerKeyword("ROOT", [this](std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      std::string value = commonItems::parser::getNextTokenWithoutMatching(input).value_or("");
+      triggers_.push_back(std::make_unique<RootTrigger>(value));
+   });
+
+
+   // country scopes
+   trigger_parser_.registerKeyword("any_primary_culture", [this](std::istream& input) {
+      std::vector<std::unique_ptr<Trigger>> triggers = TriggerImporter{}.ImportTriggers(input);
+      triggers_.push_back(std::make_unique<AnyPrimaryCultureTrigger>(std::move(triggers)));
+   });
+   trigger_parser_.registerKeyword("country_has_primary_culture", [this](std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      triggers_.push_back(std::make_unique<CountryHasPrimaryCultureTrigger>(
+          commonItems::parser::getNextTokenWithoutMatching(input).value_or("")));
+   });
+   trigger_parser_.registerKeyword("has_role", [this](std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      if (const std::optional<std::string> role_string = commonItems::parser::getNextTokenWithoutMatching(input);
+          role_string)
+      {
+         triggers_.push_back(std::make_unique<HasRoleTrigger>(role_string.value()));
+      }
+   });
+   trigger_parser_.registerKeyword("tag", [this](std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      if (const std::optional<std::string> tag_string = commonItems::parser::getNextTokenWithoutMatching(input);
+          tag_string)
+      {
+         triggers_.push_back(std::make_unique<TagTrigger>(tag_string.value()));
+      }
+   });
+
+
+   // culture scopes
+   trigger_parser_.registerKeyword("shares_heritage_trait_with_culture", [this](std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      if (const std::optional<std::string> culture_string = commonItems::parser::getNextTokenWithoutMatching(input);
+          culture_string)
+      {
+         triggers_.push_back(std::make_unique<SharesHeritageTraitWithCultureTrigger>(culture_string.value()));
+      }
+   });
+
+
+   // state scopes
+   trigger_parser_.registerKeyword("is_capital", [this]([[maybe_unused]] std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      std::string value_string = commonItems::parser::getNextTokenWithoutMatching(input).value_or("no");
+#pragma warning(push)
+#pragma warning(disable : 4242)
+      std::ranges::transform(value_string, value_string.begin(), ::tolower);
+#pragma warning(push)
+      const bool value = value_string == "yes";
+      triggers_.push_back(std::make_unique<IsCapitalTrigger>(value));
+   });
+   trigger_parser_.registerKeyword("is_homeland", [this]([[maybe_unused]] std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      std::string culture = commonItems::parser::getNextTokenWithoutMatching(input).value_or("");
+      if (culture.starts_with("cu:"))
+      {
+         culture = culture.substr(3, culture.size());
+      }
+      triggers_.push_back(std::make_unique<IsHomelandTrigger>(culture));
+   });
+   trigger_parser_.registerKeyword("is_homeland_of_country_cultures", [this]([[maybe_unused]] std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      const std::string tag = commonItems::parser::getNextTokenWithoutMatching(input).value_or("");
+      triggers_.push_back(std::make_unique<IsHomelandOfCountryCulture>(tag));
+   });
+   trigger_parser_.registerKeyword("is_on_continent", [this]([[maybe_unused]] std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      const std::string value = commonItems::parser::getNextTokenWithoutMatching(input).value_or("");
+      triggers_.push_back(std::make_unique<IsOnContinentTrigger>(value));
+   });
+   trigger_parser_.registerKeyword("owner", [this]([[maybe_unused]] std::istream& input) {
+      const std::optional<std::string> equals = commonItems::parser::getNextTokenWithoutMatching(input);
+      const std::string value = commonItems::parser::getNextTokenWithoutMatching(input).value_or("");
+      triggers_.push_back(std::make_unique<OwnerTrigger>(value));
    });
    trigger_parser_.IgnoreAndLogUnregisteredItems();
 }
@@ -48,7 +201,7 @@ std::unique_ptr<Trigger> TriggerImporter::ImportTrigger(std::istream& input)
 
    if (triggers.empty())
    {
-      return nullptr;
+      return std::make_unique<AlwaysTrigger>(true);
    }
    if (triggers.size() == 1)
    {

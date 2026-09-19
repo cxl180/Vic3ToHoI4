@@ -7,24 +7,12 @@
 namespace hoi4
 {
 
-TEST(Hoi4worldCharactersCharacter, PortraitAliasCanBeSet)
+TEST(Hoi4worldCharactersCharacter, PortraitAliasCanBeSet)  // NOLINT(cert-err58-cpp)
 {
    Character character({});
    EXPECT_TRUE(character.GetPortraitAlias().empty());
    character.SetPortraitAlias("GFX_test");
    EXPECT_EQ(character.GetPortraitAlias(), "GFX_test");
-}
-
-
-TEST(Hoi4worldCharactersCharacter, StaticIdTrackerCanIncrement)
-{
-   // Other Hoi4world tests impact this static value
-   // EXPECT_EQ(Character::GetGenId(), 1000);
-   // Character::IncrementGenId();
-   // EXPECT_EQ(Character::GetGenId(), 1001);
-   const int current_id = Character::GetGenId();
-   Character::IncrementGenId();
-   EXPECT_EQ(Character::GetGenId(), current_id + 1);
 }
 
 }  // namespace hoi4

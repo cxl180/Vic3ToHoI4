@@ -11,7 +11,8 @@ std::optional<hoi4::Admiral> GeneratePossibleAdmiral(const vic3::Character& sour
     const std::set<int>& admiral_ids,
     const mappers::CharacterTraitMapper& character_trait_mapper)
 {
-   if (!source_character.GetRoles().contains("admiral"))
+   if (!source_character.GetRoles().contains("character_role_admiral") &&
+       !source_character.GetRoles().contains("admiral"))
    {
       return std::nullopt;
    }
@@ -28,7 +29,8 @@ std::optional<hoi4::General> GeneratePossibleGeneral(const vic3::Character& sour
     const std::set<int>& general_ids,
     const mappers::CharacterTraitMapper& character_trait_mapper)
 {
-   if (!source_character.GetRoles().contains("general"))
+   if (!source_character.GetRoles().contains("character_role_general") &&
+       !source_character.GetRoles().contains("general"))
    {
       return std::nullopt;
    }
@@ -47,7 +49,8 @@ std::optional<hoi4::Advisor> GeneratePossibleAdvisor(const vic3::Character& sour
     const std::set<int>& advisor_ids,
     const mappers::CharacterTraitMapper& character_trait_mapper)
 {
-   if (!source_character.GetRoles().contains("politician"))
+   if (!source_character.GetRoles().contains("character_role_politician") &&
+       !source_character.GetRoles().contains("politician"))
    {
       return std::nullopt;
    }
@@ -61,6 +64,8 @@ std::optional<hoi4::Advisor> GeneratePossibleAdvisor(const vic3::Character& sour
        .slot = "political_advisor",
    });
 }
+
+
 std::optional<hoi4::Leader> GeneratePossibleLeader(const vic3::Character& source_character,
     const std::string& ideology,
     const int leader_id)
@@ -72,6 +77,8 @@ std::optional<hoi4::Leader> GeneratePossibleLeader(const vic3::Character& source
 
    return hoi4::Leader({.sub_ideology = ideology});
 }
+
+
 std::optional<hoi4::Spy> GeneratePossibleSpy(const vic3::Character& source_character,
     const std::string& tag,
     const mappers::CountryMapper& country_mapper,
@@ -104,6 +111,7 @@ std::optional<hoi4::Spy> GeneratePossibleSpy(const vic3::Character& source_chara
 
    return spy_data;
 }
+
 
 void EnqueueCharacterForPortrait(mappers::CultureQueue& culture_queue,
     const vic3::Character& source_character,
@@ -225,10 +233,10 @@ bool hoi4::HasMonarchs(const std::string& leader_type, const std::set<std::strin
 hoi4::Character hoi4::ConvertCharacter(const vic3::Character& source_character,
     int leader_id,
     const RoleIds& role_ids,
-    const std::string& leader_type,
-    const std::string& tag,
-    const std::string& country_ideology,
-    const std::string& sub_ideology,
+    const ConvertCharacterLeaderType& leader_type,
+    const ConvertCharacterCharacterTagType& tag,
+    const ConvertCharacterCountryIdeologyType& country_ideology,
+    const ConvertCharacterSubIdeologyType& sub_ideology,
     const std::set<std::string>& laws,
     const mappers::CountryMapper& country_mapper,
     const mappers::CharacterTraitMapper& character_trait_mapper,
@@ -240,18 +248,18 @@ hoi4::Character hoi4::ConvertCharacter(const vic3::Character& source_character,
        role_ids.field_marshal_ids,
        role_ids.general_ids,
        character_trait_mapper);
-   std::optional<Leader> leader_data = GeneratePossibleLeader(source_character, sub_ideology, leader_id);
+   std::optional<Leader> leader_data = GeneratePossibleLeader(source_character, sub_ideology.Get(), leader_id);
    std::optional<Advisor> advisor_data =
        GeneratePossibleAdvisor(source_character, role_ids.advisor_ids, character_trait_mapper);
    std::optional<Spy> spy_data =
-       GeneratePossibleSpy(source_character, tag, country_mapper, role_ids.spy_ids, character_trait_mapper);
+       GeneratePossibleSpy(source_character, tag.Get(), country_mapper, role_ids.spy_ids, character_trait_mapper);
 
    mappers::CultureQueue& culture_queue = PrepareCultureQueue(source_character.GetCulture(), culture_queues);
    EnqueueCharacterForPortrait(culture_queue,
        source_character,
-       country_ideology,
+       country_ideology.Get(),
        laws,
-       leader_type,
+       leader_type.Get(),
        admiral_data.has_value(),
        general_data.has_value(),
        leader_data.has_value(),

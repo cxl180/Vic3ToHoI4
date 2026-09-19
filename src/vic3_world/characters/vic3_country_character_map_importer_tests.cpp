@@ -9,7 +9,7 @@ namespace vic3
 {
 
 
-TEST(Vic3WorldCharactersVic3CountryCharacterMapImporter, NoInputIsEmpty)
+TEST(Vic3WorldCharactersVic3CountryCharacterMapImporter, NoInputIsEmpty)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const auto country_character_map = ImportCountryCharacterMap(input);
@@ -18,23 +18,26 @@ TEST(Vic3WorldCharactersVic3CountryCharacterMapImporter, NoInputIsEmpty)
 }
 
 
-TEST(Vic3WorldCharactersVic3CountryCharacterMapImporter, CountryCharacterMapCanBeImported)
+TEST(Vic3WorldCharactersVic3CountryCharacterMapImporter, CountryCharacterMapCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
    input << "max=535\n";
    input << "1 = { 1 2 3 }\n";
    input << "2 = { 4 5 6 }\n";
+   input << "3019898882 = { 7 8 9 }\n";
    input << "}\n";
 
    const auto country_character_map = ImportCountryCharacterMap(input);
 
    EXPECT_THAT(country_character_map,
-       testing::UnorderedElementsAre(testing::Pair(1, std::vector{1, 2, 3}), testing::Pair(2, std::vector{4, 5, 6})));
+       testing::UnorderedElementsAre(testing::Pair(1, std::vector{1, 2, 3}),
+           testing::Pair(2, std::vector{4, 5, 6}),
+           testing::Pair(-1275068414, std::vector{7, 8, 9})));
 }
 
 
-TEST(Vic3WorldCharactersVic3CountryCharacterMapImporter, NumberOfMatchesAreLogged)
+TEST(Vic3WorldCharactersVic3CountryCharacterMapImporter, NumberOfMatchesAreLogged)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";

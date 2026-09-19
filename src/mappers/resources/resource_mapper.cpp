@@ -2,21 +2,29 @@
 
 #include <external/commonItems/Log.h>
 
+#include <algorithm>
 #include <set>
+
+
 
 namespace
 {
 
-std::set<std::string> seen;
-
-void warn(const std::string& hoi_resource)
+std::set<std::string>& GetSeenWarnings()
 {
-   if (seen.contains(hoi_resource))
+   static std::set<std::string> seen;
+   return seen;
+};
+
+
+void Warn(const std::string& hoi_resource)
+{
+   if (GetSeenWarnings().contains(hoi_resource))
    {
       return;
    }
    Log(LogLevel::Warning) << "Configuration for " << hoi_resource << " is missing.";
-   seen.insert(hoi_resource);
+   GetSeenWarnings().insert(hoi_resource);
 }
 
 }  // namespace
@@ -26,7 +34,7 @@ float mappers::ResourceMapper::CalculateScore(const std::string& hoi_resource,
 {
    if (!scores_.contains(hoi_resource))
    {
-      warn(hoi_resource);
+      Warn(hoi_resource);
       return 0.0F;
    }
    float base = 0.0F;
@@ -48,10 +56,7 @@ float mappers::ResourceMapper::CalculateScore(const std::string& hoi_resource,
    {
       return base;
    }
-   if (bonus > base)
-   {
-      bonus = base;
-   }
+   bonus = std::min(bonus, base);
    bonus /= base;
    bonus *= score.bonus;
    return base * (1.0F + bonus);
@@ -61,7 +66,7 @@ float mappers::ResourceMapper::WorldTotal(const std::string& hoi_resource) const
 {
    if (!scores_.contains(hoi_resource))
    {
-      warn(hoi_resource);
+      Warn(hoi_resource);
       return 0.0F;
    }
 

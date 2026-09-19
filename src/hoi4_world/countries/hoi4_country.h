@@ -22,6 +22,9 @@
 namespace hoi4
 {
 
+constexpr int kLastElectionYear = 1932;
+constexpr int kMaxIdeologySupport = 100;
+
 struct NameList
 {
    std::set<std::string> male_names;
@@ -42,17 +45,19 @@ struct Unit
    std::partial_ordering operator<=>(const Unit&) const = default;
 };
 
+
 struct CountryOptions
 {
    int source_country_number;
    std::string tag;
    commonItems::Color color;
+   std::set<int> owned_states;
    std::optional<int> capital_state;
    std::set<std::string> primary_cultures;
    std::string ideology = "neutrality";
    std::string sub_ideology = "despotism";
-   std::map<std::string, int> ideology_support;
-   date last_election{1933, 1, 1};
+   std::map<std::string, int> ideology_support{{"neutrality", kMaxIdeologySupport}};
+   date last_election{kLastElectionYear, 1, 1};
    bool has_elections;
    Technologies technologies;
    std::vector<EquipmentVariant> legacy_ship_variants;
@@ -78,6 +83,7 @@ struct CountryOptions
    std::vector<War> wars;
 };
 
+
 class Country
 {
   public:
@@ -85,6 +91,7 @@ class Country
        source_country_number_(country_options.source_country_number),
        tag_(std::move(country_options.tag)),
        color_(country_options.color),
+       owned_states_(std::move(country_options.owned_states)),
        capital_state_(country_options.capital_state),
        primary_cultures_(std::move(country_options.primary_cultures)),
        ideology_(std::move(country_options.ideology)),
@@ -120,6 +127,7 @@ class Country
    [[nodiscard]] int GetSourceCountryNumber() const { return source_country_number_; }
    [[nodiscard]] const std::string& GetTag() const { return tag_; }
    [[nodiscard]] const commonItems::Color& GetColor() const { return color_; }
+   [[nodiscard]] const std::set<int>& GetOwnedStates() const { return owned_states_; }
    [[nodiscard]] const std::optional<int>& GetCapitalState() const { return capital_state_; }
    [[nodiscard]] const std::set<std::string>& GetPrimaryCultures() const { return primary_cultures_; }
    [[nodiscard]] int GetConvoys() const { return convoys_; }
@@ -144,14 +152,16 @@ class Country
    [[nodiscard]] const std::optional<std::string>& GetOverlord() const { return overlord_; }
    [[nodiscard]] int GetStartingResearchSlots() const { return starting_research_slots_; }
    [[nodiscard]] float GetStability() const { return stability_; }
-   [[nodiscard]] float GetWarSupport() const { return 0.60F; }
+   [[nodiscard]] static float GetWarSupport() { return 0.60F; }
    [[nodiscard]] const std::vector<TaskForce>& GetTaskForces() const { return task_forces_; }
    [[nodiscard]] const std::vector<Unit>& GetUnits() const { return units_; }
    [[nodiscard]] const std::vector<War>& GetWars() const { return wars_; }
+   [[nodiscard]] bool HasRole(const std::string& role) const { return role_names_.contains(role); }
    [[nodiscard]] const FocusTree& GetFocusTree() const { return focus_tree_; }
 
    void AddWar(War war) { wars_.emplace_back(std::move(war)); }
    void RemovePuppets(const std::set<std::string>& puppet_tags);
+   void SetRoles(const std::set<std::string>& role_names) { role_names_ = role_names; }
    void SetFocusTree(const FocusTree& focus_tree) { focus_tree_ = focus_tree; }
 
    std::partial_ordering operator<=>(const Country&) const = default;
@@ -164,12 +174,13 @@ class Country
    int source_country_number_;
    std::string tag_;
    commonItems::Color color_;
+   std::set<int> owned_states_;
    std::optional<int> capital_state_;
    std::set<std::string> primary_cultures_;
    std::string ideology_ = "neutrality";
    std::string sub_ideology_ = "despotism";
-   std::map<std::string, int> ideology_support_{{"neutrality", 100}};
-   date last_election_{1933, 1, 1};
+   std::map<std::string, int> ideology_support_{{"neutrality", kMaxIdeologySupport}};
+   date last_election_{kLastElectionYear, 1, 1};
    bool has_elections_ = false;
    Technologies technologies_;
    std::vector<EquipmentVariant> legacy_ship_variants_;
@@ -193,6 +204,7 @@ class Country
    int convoys_;
    std::vector<TaskForce> task_forces_;
    std::vector<War> wars_;
+   std::set<std::string> role_names_;
    FocusTree focus_tree_;
 };
 

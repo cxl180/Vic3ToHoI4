@@ -10,7 +10,7 @@
 namespace vic3
 {
 
-TEST(Vic3WorldCountriesVic3CountriesImporter, NoCountriesByDefault)
+TEST(Vic3WorldCountriesVic3CountriesImporter, NoCountriesByDefault)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    const auto countries = ImportCountries({}, input);
@@ -19,7 +19,7 @@ TEST(Vic3WorldCountriesVic3CountriesImporter, NoCountriesByDefault)
 }
 
 
-TEST(Vic3WorldCountriesVic3CountriesImporter, CountriesCanBeImported)
+TEST(Vic3WorldCountriesVic3CountriesImporter, CountriesCanBeImported)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
@@ -30,22 +30,28 @@ TEST(Vic3WorldCountriesVic3CountriesImporter, CountriesCanBeImported)
    input << "1={\n";
    input << "\tdefinition=\"TWO\"\n";
    input << "\t}\n";
+   input << "3019898882={\n";
+   input << "\tdefinition=\"BIG\"\n";
+   input << "\t}\n";
    input << "}\n";
    const auto countries = ImportCountries(
        {
            {"TAG", commonItems::Color(std::array{1, 2, 3})},
            {"TWO", commonItems::Color(std::array{2, 4, 6})},
+           {"BIG", commonItems::Color(std::array{3, 6, 9})},
        },
        input);
 
    EXPECT_THAT(countries,
        testing::UnorderedElementsAre(
            testing::Pair(0, Country({.number = 0, .tag = "TAG", .color = commonItems::Color(std::array{1, 2, 3})})),
-           testing::Pair(1, Country({.number = 1, .tag = "TWO", .color = commonItems::Color(std::array{2, 4, 6})}))));
+           testing::Pair(1, Country({.number = 1, .tag = "TWO", .color = commonItems::Color(std::array{2, 4, 6})})),
+           testing::Pair(-1275068414,
+               Country({.number = -1275068414, .tag = "BIG", .color = commonItems::Color(std::array{3, 6, 9})}))));
 }
 
 
-TEST(Vic3WorldCountriesVic3CountriesImporter, CountryIndexesCanBeSkipped)
+TEST(Vic3WorldCountriesVic3CountriesImporter, CountryIndexesCanBeSkipped)  // NOLINT(cert-err58-cpp)
 {
    std::stringstream input;
    input << "={\n";
